@@ -11,6 +11,7 @@ import com.mono.backend.event.payload.CommentDeletedEventPayload
 import com.mono.backend.persistence.comment.ArticleCommentCountPersistencePort
 import com.mono.backend.persistence.comment.CommentPersistencePortV2
 import com.mono.backend.snowflake.Snowflake
+import com.mono.backend.transaction.transaction
 import com.mono.backend.util.PageLimitCalculator
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -24,26 +25,35 @@ class CommentServiceV2(
     private val articleEventDispatcherPort: ArticleEventDispatcherPort
 ) : CommentV2UseCase {
     override suspend fun create(request: CommentCreateRequestV2): CommentResponseV2 = coroutineScope {
-        val parent = findParent(request)
-        val parentCommentPath = parent?.commentPath ?: CommentPath("").path
-        val descendantsTopPath = commentPersistencePortV2.findDescendantsTopPath(request.articleId, parentCommentPath)
-        val commentDeferred = async {
-            commentPersistencePortV2.save(request.toDomain(Snowflake.nextId(), parentCommentPath, descendantsTopPath))
-        }
-
-        launch {
-            articleCommentCountPersistencePort.increase(request.articleId).takeIf { it == 0 }?.let {
-                articleCommentCountPersistencePort.save(ArticleCommentCount(request.articleId, 1L))
+        transaction {
+            val parent = findParent(request)
+            val parentCommentPath = parent?.commentPath ?: CommentPath("").path
+            val descendantsTopPath =
+                commentPersistencePortV2.findDescendantsTopPath(request.articleId, parentCommentPath)
+            val commentDeferred = async {
+                commentPersistencePortV2.save(
+                    request.toDomain(
+                        Snowflake.nextId(),
+                        parentCommentPath,
+                        descendantsTopPath
+                    )
+                )
             }
+
+            launch {
+                articleCommentCountPersistencePort.increase(request.articleId).takeIf { it == 0 }?.let {
+                    articleCommentCountPersistencePort.save(ArticleCommentCount(request.articleId, 1L))
+                }
+            }
+
+            val comment = commentDeferred.await()
+            articleEventDispatcherPort.dispatch(
+                type = EventType.COMMENT_CREATED,
+                payload = CommentCreatedEventPayload.from(comment, count(comment.articleId)),
+            )
+
+            CommentResponseV2.from(comment)
         }
-
-        val comment = commentDeferred.await()
-        articleEventDispatcherPort.dispatch(
-            type = EventType.COMMENT_CREATED,
-            payload = CommentCreatedEventPayload.from(comment, count(comment.articleId)),
-        )
-
-        CommentResponseV2.from(comment)
     }
 
     private suspend fun findParent(request: CommentCreateRequestV2): CommentV2? {
@@ -56,29 +66,32 @@ class CommentServiceV2(
         return commentPersistencePortV2.findById(commentId)?.let { CommentResponseV2.from(it) }
     }
 
-    override suspend fun update(commentId: Long, request: CommentUpdateRequest): CommentResponseV2 {
+    override suspend fun update(commentId: Long, request: CommentUpdateRequest): CommentResponseV2 = transaction {
         val comment = commentPersistencePortV2.findById(commentId) ?: throw RuntimeException("Comment not found")
         val updatedComment = comment.copy(content = request.content)
         commentPersistencePortV2.save(updatedComment)
-        return CommentResponseV2.from(updatedComment)
+        CommentResponseV2.from(updatedComment)
     }
 
-    override suspend fun delete(commentId: Long) {
-        commentPersistencePortV2.findById(commentId)
-            ?.takeIf { !it.deleted }
-            ?.let { comment ->
-                if (hasChildren(comment)) {
-                    comment.delete()
-                    commentPersistencePortV2.save(comment)
-                } else {
-                    delete(comment)
-                }
 
-                articleEventDispatcherPort.dispatch(
-                    type = EventType.COMMENT_DELETED,
-                    payload = CommentDeletedEventPayload.from(comment, count(comment.articleId)),
-                )
-            }
+    override suspend fun delete(commentId: Long) {
+        transaction {
+            commentPersistencePortV2.findById(commentId)
+                ?.takeIf { !it.deleted }
+                ?.let { comment ->
+                    if (hasChildren(comment)) {
+                        comment.delete()
+                        commentPersistencePortV2.save(comment)
+                    } else {
+                        delete(comment)
+                    }
+
+                    articleEventDispatcherPort.dispatch(
+                        type = EventType.COMMENT_DELETED,
+                        payload = CommentDeletedEventPayload.from(comment, count(comment.articleId)),
+                    )
+                }
+        }
     }
 
     private suspend fun hasChildren(comment: CommentV2): Boolean {

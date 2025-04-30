@@ -12,6 +12,7 @@ import com.mono.backend.event.payload.ArticleUpdatedEventPayload
 import com.mono.backend.persistence.article.ArticlePersistencePort
 import com.mono.backend.persistence.article.BoardArticleCountPersistencePort
 import com.mono.backend.snowflake.Snowflake
+import com.mono.backend.transaction.transaction
 import com.mono.backend.util.PageLimitCalculator
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -25,6 +26,7 @@ class ArticleCommandService(
     private val articleEventDispatcherPort: ArticleEventDispatcherPort,
 ) : ArticleCommandUseCase {
     override suspend fun create(request: ArticleCreateRequest): ArticleResponse = coroutineScope {
+        transaction {
         val articleDeferred = async { articlePersistencePort.save(request.toDomain(Snowflake.nextId())) }
 
         launch {
@@ -40,9 +42,10 @@ class ArticleCommandService(
             payload = ArticleCreatedEventPayload.from(article, count(article.boardId))
         )
         ArticleResponse.from(article)
+            }
     }
 
-    override suspend fun update(articleId: Long, request: ArticleUpdateRequest): ArticleResponse {
+    override suspend fun update(articleId: Long, request: ArticleUpdateRequest): ArticleResponse = transaction {
         val article = articlePersistencePort.findById(articleId) ?: throw RuntimeException("Article not found")
         val updatedArticle = article.copy(title = request.title, content = request.content)
         articlePersistencePort.save(updatedArticle) // does not need in JPA
@@ -52,23 +55,24 @@ class ArticleCommandService(
             payload = ArticleUpdatedEventPayload.from(article)
         )
 
-        return ArticleResponse.from(updatedArticle)
+        ArticleResponse.from(updatedArticle)
     }
 
     suspend fun read(articleId: Long) = articlePersistencePort.findById(articleId)?.let { ArticleResponse.from(it) }
 
-    //    @Transactional
     override suspend fun delete(articleId: Long) {
-        articlePersistencePort.findById(articleId)?.let { article ->
-            coroutineScope {
-                launch { articlePersistencePort.delete(article) }
-                launch { boardArticleCountPersistencePort.decrease(article.boardId) }
-            }
+        transaction {
+            articlePersistencePort.findById(articleId)?.let { article ->
+                coroutineScope {
+                    launch { articlePersistencePort.delete(article) }
+                    launch { boardArticleCountPersistencePort.decrease(article.boardId) }
+                }
 
-            articleEventDispatcherPort.dispatch(
-                type = EventType.ARTICLE_DELETED,
-                payload = ArticleDeletedEventPayload.from(article, count(article.boardId))
-            )
+                articleEventDispatcherPort.dispatch(
+                    type = EventType.ARTICLE_DELETED,
+                    payload = ArticleDeletedEventPayload.from(article, count(article.boardId))
+                )
+            }
         }
     }
 

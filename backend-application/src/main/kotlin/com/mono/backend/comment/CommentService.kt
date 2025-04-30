@@ -7,6 +7,7 @@ import com.mono.backend.comment.response.CommentResponse
 import com.mono.backend.util.PageLimitCalculator
 import com.mono.backend.persistence.comment.CommentPersistencePort
 import com.mono.backend.snowflake.Snowflake
+import com.mono.backend.transaction.transaction
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
@@ -15,10 +16,10 @@ import org.springframework.stereotype.Service
 class CommentService(
     private val commentPersistencePort: CommentPersistencePort
 ) : CommentUseCase {
-    override suspend fun create(request: CommentCreateRequest): CommentResponse {
+    override suspend fun create(request: CommentCreateRequest): CommentResponse = transaction {
         val parent = findParent(request)
         val comment = commentPersistencePort.save(request.toDomain(Snowflake.nextId(), parent))
-        return CommentResponse.from(comment)
+        CommentResponse.from(comment)
     }
 
     private suspend fun findParent(request: CommentCreateRequest): Comment? {
@@ -40,16 +41,18 @@ class CommentService(
     }
 
     override suspend fun delete(commentId: Long) {
-        commentPersistencePort.findById(commentId)
-            ?.takeUnless { it.deleted }
-            ?.let { comment ->
-                if (hasChildren(comment)) {
-                    comment.delete()
-                    commentPersistencePort.save(comment) // does not need in JPA
-                } else {
-                    delete(comment)
+        transaction {
+            commentPersistencePort.findById(commentId)
+                ?.takeUnless { it.deleted }
+                ?.let { comment ->
+                    if (hasChildren(comment)) {
+                        comment.delete()
+                        commentPersistencePort.save(comment) // does not need in JPA
+                    } else {
+                        delete(comment)
+                    }
                 }
-            }
+        }
     }
 
     private suspend fun hasChildren(comment: Comment): Boolean {
