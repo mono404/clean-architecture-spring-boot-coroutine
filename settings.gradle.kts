@@ -21,13 +21,14 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
-include("backend-adapter-persistence")
-include("backend-adapter-web")
-include("backend-application")
 include("backend-bootstrap")
-include("backend-domain")
-include("backend-port-persistence")
+include("backend-adapter-web")
 include("backend-port-web")
+include("backend-application")
+include("backend-port-infra")
+include("backend-adapter-infra")
+include("backend-domain")
+include("backend-common")
 
 rootProject.children.forEach { project ->
     project.buildFileName = "${project.name.lowercase()}.gradle.kts"

@@ -6,7 +6,9 @@ plugins {
 
 dependencies {
     implementation(project(":backend-port-web"))
+    implementation(project(":backend-common"))
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
+//    implementation("org.springframework.boot:spring-boot-starter-security")
 }

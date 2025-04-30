@@ -1,0 +1,21 @@
+package com.mono.backend.comment.request
+
+import com.mono.backend.comment.CommentPath
+import com.mono.backend.comment.CommentV2
+
+data class CommentCreateRequestV2(
+    val articleId: Long,
+    val content: String,
+    val parentPath: String?,
+    val writerId: Long
+) {
+    fun toDomain(commentId: Long, parentCommentPath: String, descendantsTopPath: String?): CommentV2 {
+        return CommentV2(
+            commentId = commentId,
+            content = content,
+            articleId = articleId,
+            writerId = writerId,
+            commentPath = CommentPath(parentCommentPath).createChildCommentPath(descendantsTopPath).path
+        )
+    }
+}

@@ -1,3 +1,11 @@
 ---
 server:
   port: 3001
+
+spring:
+  config:
+    import: >
+      optional:classpath:/persistence.yml,
+      classpath:persistence.yml,
+      optional:classpath:/web-client.yml,
+      classpath:web-client.yml
