@@ -11,3 +11,7 @@ webClient:
   services:
     er-api:
       url: https://open.er-api.com/v6/latest/
+    google-o-auth:
+      url: https://www.googleapis.com/oauth2/v3
+    kakao-o-auth:
+      url: https://kapi.kakao.com

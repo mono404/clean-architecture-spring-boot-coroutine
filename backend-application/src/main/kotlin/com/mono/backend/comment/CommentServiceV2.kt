@@ -27,15 +27,15 @@ class CommentServiceV2(
     override suspend fun create(request: CommentCreateRequestV2): CommentResponseV2 = coroutineScope {
         transaction {
             val parent = findParent(request)
-            val parentCommentPath = parent?.commentPath ?: CommentPath("").path
+            val parentCommentPath = parent?.commentPath ?: CommentPath("")
             val descendantsTopPath =
-                commentPersistencePortV2.findDescendantsTopPath(request.articleId, parentCommentPath)
+                commentPersistencePortV2.findDescendantsTopPath(request.articleId, parentCommentPath.path)
             val commentDeferred = async {
                 commentPersistencePortV2.save(
                     request.toDomain(
-                        Snowflake.nextId(),
-                        parentCommentPath,
-                        descendantsTopPath
+                        commentId = Snowflake.nextId(),
+                        parentCommentPath = parentCommentPath,
+                        descendantsTopPath = descendantsTopPath
                     )
                 )
             }
@@ -95,7 +95,7 @@ class CommentServiceV2(
     }
 
     private suspend fun hasChildren(comment: CommentV2): Boolean {
-        return commentPersistencePortV2.findDescendantsTopPath(comment.articleId, comment.commentPath) != null
+        return commentPersistencePortV2.findDescendantsTopPath(comment.articleId, comment.commentPath.path) != null
     }
 
     private suspend fun delete(comment: CommentV2): Unit = coroutineScope {
@@ -103,7 +103,7 @@ class CommentServiceV2(
         launch { articleCommentCountPersistencePort.decrease(comment.articleId) }
         launch {
             if (!comment.isRoot()) {
-                commentPersistencePortV2.findByPath(CommentPath(comment.commentPath).getParentPath())
+                commentPersistencePortV2.findByPath(comment.commentPath.getParentPath())
                     ?.takeIf { it.deleted && !hasChildren(it) }
                     ?.let { delete(it) }
             }

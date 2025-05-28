@@ -1,5 +1,6 @@
 package com.mono.backend.persistence.comment
 
+import com.mono.backend.comment.CommentPath
 import com.mono.backend.comment.CommentV2
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
@@ -32,7 +33,7 @@ data class CommentV2Entity(
             content = content,
             articleId = articleId,
             writerId = writerId,
-            commentPath = commentPath,
+            commentPath = CommentPath(commentPath),
             deleted = deleted,
             createdAt = createdAt,
             updatedAt = updatedAt
@@ -46,7 +47,7 @@ data class CommentV2Entity(
                 content = commentV2.content,
                 articleId = commentV2.articleId,
                 writerId = commentV2.writerId,
-                commentPath = commentV2.commentPath,
+                commentPath = commentV2.commentPath.path,
                 deleted = commentV2.deleted,
                 createdAt = commentV2.createdAt,
                 updatedAt = commentV2.updatedAt

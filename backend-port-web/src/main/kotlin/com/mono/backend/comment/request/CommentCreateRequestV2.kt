@@ -9,13 +9,13 @@ data class CommentCreateRequestV2(
     val parentPath: String?,
     val writerId: Long
 ) {
-    fun toDomain(commentId: Long, parentCommentPath: String, descendantsTopPath: String?): CommentV2 {
+    fun toDomain(commentId: Long, parentCommentPath: CommentPath, descendantsTopPath: String?): CommentV2 {
         return CommentV2(
             commentId = commentId,
             content = content,
             articleId = articleId,
             writerId = writerId,
-            commentPath = CommentPath(parentCommentPath).createChildCommentPath(descendantsTopPath).path
+            commentPath = parentCommentPath.createChildCommentPath(descendantsTopPath),
         )
     }
 }

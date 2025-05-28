@@ -27,22 +27,22 @@ class ArticleCommandService(
 ) : ArticleCommandUseCase {
     override suspend fun create(request: ArticleCreateRequest): ArticleResponse = coroutineScope {
         transaction {
-        val articleDeferred = async { articlePersistencePort.save(request.toDomain(Snowflake.nextId())) }
+            val articleDeferred = async { articlePersistencePort.save(request.toDomain(Snowflake.nextId())) }
 
-        launch {
-            boardArticleCountPersistencePort.increase(request.boardId).takeIf { it == 0 }?.let {
-                boardArticleCountPersistencePort.save(BoardArticleCount(request.boardId, 1L))
+            launch {
+                boardArticleCountPersistencePort.increase(request.boardId).takeIf { it == 0 }?.let {
+                    boardArticleCountPersistencePort.save(BoardArticleCount(request.boardId, 1L))
+                }
             }
+
+            val article = articleDeferred.await()
+
+            articleEventDispatcherPort.dispatch(
+                type = EventType.ARTICLE_CREATED,
+                payload = ArticleCreatedEventPayload.from(article, count(article.boardId))
+            )
+            ArticleResponse.from(article)
         }
-
-        val article = articleDeferred.await()
-
-        articleEventDispatcherPort.dispatch(
-            type = EventType.ARTICLE_CREATED,
-            payload = ArticleCreatedEventPayload.from(article, count(article.boardId))
-        )
-        ArticleResponse.from(article)
-            }
     }
 
     override suspend fun update(articleId: Long, request: ArticleUpdateRequest): ArticleResponse = transaction {

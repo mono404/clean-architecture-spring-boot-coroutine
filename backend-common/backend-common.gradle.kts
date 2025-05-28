@@ -26,4 +26,9 @@ dependencies {
     api("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
     api("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+
+    api("org.springframework.boot:spring-boot-starter-security:3.4.5")
+
+    api("org.springframework.boot:spring-boot-starter-test:3.4.5")
+    api("org.junit.platform:junit-platform-launcher:1.12.2")
 }

@@ -21,7 +21,7 @@ data class CommentResponseV2(
                 articleId = comment.articleId,
                 writerId = comment.writerId,
                 deleted = comment.deleted,
-                path = comment.commentPath,
+                path = comment.commentPath.path,
                 createdAt = comment.createdAt!!,
                 updatedAt = comment.updatedAt!!
             )

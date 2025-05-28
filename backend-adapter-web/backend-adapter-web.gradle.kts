@@ -10,5 +10,4 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
-//    implementation("org.springframework.boot:spring-boot-starter-security")
 }

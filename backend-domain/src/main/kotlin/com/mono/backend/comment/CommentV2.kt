@@ -7,12 +7,12 @@ data class CommentV2(
     val content: String,
     val articleId: Long,
     val writerId: Long,
-    val commentPath: String,
+    val commentPath: CommentPath,
     var deleted: Boolean = false,
     var createdAt: LocalDateTime? = null,
     var updatedAt: LocalDateTime? = null,
 ) {
-    fun isRoot(): Boolean = CommentPath(commentPath).isRoot()
+    fun isRoot(): Boolean = commentPath.isRoot()
 
     fun delete() {
         deleted = true

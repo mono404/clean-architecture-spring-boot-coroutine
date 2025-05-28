@@ -2,6 +2,10 @@
 server:
   port: 3001
 
+security:
+  jwt:
+    secret: e5b13fd6fa87dab523ec65706238ecbd9f7f7fb79f20cab91984f992fa82e2f3
+
 spring:
   config:
     import: >
