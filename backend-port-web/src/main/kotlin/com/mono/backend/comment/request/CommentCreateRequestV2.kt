@@ -4,7 +4,7 @@ import com.mono.backend.comment.CommentPath
 import com.mono.backend.comment.CommentV2
 
 data class CommentCreateRequestV2(
-    val articleId: Long,
+    val postId: Long,
     val content: String,
     val parentPath: String?,
     val writerId: Long
@@ -13,7 +13,7 @@ data class CommentCreateRequestV2(
         return CommentV2(
             commentId = commentId,
             content = content,
-            articleId = articleId,
+            postId = postId,
             writerId = writerId,
             commentPath = parentCommentPath.createChildCommentPath(descendantsTopPath),
         )

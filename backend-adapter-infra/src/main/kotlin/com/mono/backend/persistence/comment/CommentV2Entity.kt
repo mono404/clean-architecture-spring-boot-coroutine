@@ -15,7 +15,7 @@ data class CommentV2Entity(
     @Id
     val commentId: Long,
     val content: String,
-    val articleId: Long,
+    val postId: Long,
     val writerId: Long,
     @Column("path")
     val commentPath: String,
@@ -31,7 +31,7 @@ data class CommentV2Entity(
         return CommentV2(
             commentId = commentId,
             content = content,
-            articleId = articleId,
+            postId = postId,
             writerId = writerId,
             commentPath = CommentPath(commentPath),
             deleted = deleted,
@@ -45,7 +45,7 @@ data class CommentV2Entity(
             return CommentV2Entity(
                 commentId = commentV2.commentId,
                 content = commentV2.content,
-                articleId = commentV2.articleId,
+                postId = commentV2.postId,
                 writerId = commentV2.writerId,
                 commentPath = commentV2.commentPath.path,
                 deleted = commentV2.deleted,

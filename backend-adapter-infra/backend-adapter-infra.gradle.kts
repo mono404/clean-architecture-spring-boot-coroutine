@@ -15,6 +15,6 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     runtimeOnly("io.asyncer:r2dbc-mysql:1.3.0")
 
-
+    api("software.amazon.awssdk:s3:2.31.52")
 //    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }

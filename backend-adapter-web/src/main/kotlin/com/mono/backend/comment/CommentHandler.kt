@@ -22,23 +22,23 @@ class CommentHandler(
     }
 
     suspend fun readAll(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.queryParam("articleId").get().toLong()
+        val postId = serverRequest.queryParam("postId").get().toLong()
         val page = serverRequest.queryParam("page").get().toLong()
         val pageSize = serverRequest.queryParam("pageSize").get().toLong()
         return ok(commentUseCase.readAll(
-            articleId = articleId,
+            postId = postId,
             page = page,
             pageSize = pageSize
         ))
     }
 
     suspend fun readAllInfiniteScroll(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.queryParam("articleId").get().toLong()
+        val postId = serverRequest.queryParam("postId").get().toLong()
         val pageSize = serverRequest.queryParam("pageSize").get().toLong()
         val lastParentCommentId = serverRequest.queryParam("lastParentCommentId").getOrNull()?.toLong()
         val lastCommentId = serverRequest.queryParam("lastCommentId").getOrNull()?.toLong()
         return ok(commentUseCase.readAllInfiniteScroll(
-            articleId = articleId,
+            postId = postId,
             lastParentCommentId = lastParentCommentId,
             lastCommentId = lastCommentId,
             limit = pageSize

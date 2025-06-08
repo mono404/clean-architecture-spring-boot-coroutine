@@ -10,7 +10,7 @@ class ViewRouter(
 ) {
     @Bean
     fun viewRoutes(): CoRouterFunctionDsl.() -> Unit = {
-        POST("/users/{userId}", viewHandler::increase)
+        POST("/members/{memberId}", viewHandler::increase)
         GET("/count", viewHandler::count)
     }
 }

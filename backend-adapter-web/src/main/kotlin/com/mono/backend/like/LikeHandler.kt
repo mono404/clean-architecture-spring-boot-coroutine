@@ -8,56 +8,56 @@ import org.springframework.web.reactive.function.server.ServerResponse
 
 @Component
 class LikeHandler(
-    private val articleLikeUseCase: ArticleLikeUseCase
+    private val postLikeUseCase: PostLikeUseCase
 ) : DefaultHandler {
     val log = logger()
 
     suspend fun read(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.pathVariable("articleId").toLong()
-        val userId = serverRequest.pathVariable("userId").toLong()
-        return articleLikeUseCase.read(articleId, userId)?.let { ok(it) } ?: noContent()
+        val postId = serverRequest.pathVariable("postId").toLong()
+        val memberId = serverRequest.pathVariable("memberId").toLong()
+        return postLikeUseCase.read(postId, memberId)?.let { ok(it) } ?: noContent()
     }
 
     suspend fun count(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.pathVariable("articleId").toLong()
-        return ok(articleLikeUseCase.count(articleId))
+        val postId = serverRequest.pathVariable("postId").toLong()
+        return ok(postLikeUseCase.count(postId))
     }
 
     suspend fun likePessimisticLock1(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.pathVariable("articleId").toLong()
-        val userId = serverRequest.pathVariable("userId").toLong()
-        return ok(articleLikeUseCase.likePessimisticLock1(articleId, userId))
+        val postId = serverRequest.pathVariable("postId").toLong()
+        val memberId = serverRequest.pathVariable("memberId").toLong()
+        return ok(postLikeUseCase.likePessimisticLock1(postId, memberId))
     }
     suspend fun unlikePessimisticLock1(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.pathVariable("articleId").toLong()
-        val userId = serverRequest.pathVariable("userId").toLong()
-        articleLikeUseCase.unlikePessimisticLock1(articleId, userId)
+        val postId = serverRequest.pathVariable("postId").toLong()
+        val memberId = serverRequest.pathVariable("memberId").toLong()
+        postLikeUseCase.unlikePessimisticLock1(postId, memberId)
         return noContent()
     }
 
     suspend fun likePessimisticLock2(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.pathVariable("articleId").toLong()
-        val userId = serverRequest.pathVariable("userId").toLong()
-        return ok(articleLikeUseCase.likePessimisticLock2(articleId, userId))
+        val postId = serverRequest.pathVariable("postId").toLong()
+        val memberId = serverRequest.pathVariable("memberId").toLong()
+        return ok(postLikeUseCase.likePessimisticLock2(postId, memberId))
     }
 
     suspend fun unlikePessimisticLock2(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.pathVariable("articleId").toLong()
-        val userId = serverRequest.pathVariable("userId").toLong()
-        articleLikeUseCase.unlikePessimisticLock2(articleId, userId)
+        val postId = serverRequest.pathVariable("postId").toLong()
+        val memberId = serverRequest.pathVariable("memberId").toLong()
+        postLikeUseCase.unlikePessimisticLock2(postId, memberId)
         return noContent()
     }
 
     suspend fun likeOptimisticLock(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.pathVariable("articleId").toLong()
-        val userId = serverRequest.pathVariable("userId").toLong()
-        return ok(articleLikeUseCase.likeOptimisticLock(articleId, userId))
+        val postId = serverRequest.pathVariable("postId").toLong()
+        val memberId = serverRequest.pathVariable("memberId").toLong()
+        return ok(postLikeUseCase.likeOptimisticLock(postId, memberId))
     }
 
     suspend fun unlikeOptimisticLock(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.pathVariable("articleId").toLong()
-        val userId = serverRequest.pathVariable("userId").toLong()
-        articleLikeUseCase.unlikeOptimisticLock(articleId, userId)
+        val postId = serverRequest.pathVariable("postId").toLong()
+        val memberId = serverRequest.pathVariable("memberId").toLong()
+        postLikeUseCase.unlikeOptimisticLock(postId, memberId)
         return noContent()
     }
 }

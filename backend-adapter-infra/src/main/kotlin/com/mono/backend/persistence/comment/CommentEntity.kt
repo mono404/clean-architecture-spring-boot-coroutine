@@ -14,7 +14,7 @@ data class CommentEntity(
     val commentId: Long,
     val content: String,
     val parentCommentId: Long,
-    val articleId: Long,
+    val postId: Long,
     val writerId: Long,
     var deleted: Boolean = false,
     @CreatedDate
@@ -31,7 +31,7 @@ data class CommentEntity(
                 commentId = comment.commentId,
                 content = comment.content,
                 parentCommentId = comment.parentCommentId,
-                articleId = comment.articleId,
+                postId = comment.postId,
                 writerId = comment.writerId
             )
         }
@@ -42,7 +42,7 @@ data class CommentEntity(
             commentId = commentId,
             content = content,
             parentCommentId = parentCommentId,
-            articleId = articleId,
+            postId = postId,
             writerId = writerId
         )
     }

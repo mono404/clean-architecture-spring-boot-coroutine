@@ -21,12 +21,12 @@ class CommentHandlerV2(
     }
 
     suspend fun readAll(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.queryParam("articleId").get().toLong()
+        val postId = serverRequest.queryParam("postId").get().toLong()
         val page = serverRequest.queryParam("page").get().toLong()
         val pageSize = serverRequest.queryParam("pageSize").get().toLong()
         return ok(
             commentV2UseCase.readAll(
-                articleId = articleId,
+                postId = postId,
                 page = page,
                 pageSize = pageSize
             )
@@ -34,12 +34,12 @@ class CommentHandlerV2(
     }
 
     suspend fun readAllInfiniteScroll(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.queryParam("articleId").get().toLong()
+        val postId = serverRequest.queryParam("postId").get().toLong()
         val lastPath = serverRequest.queryParam("lastPath").getOrNull()
         val pageSize = serverRequest.queryParam("pageSize").get().toLong()
         return ok(
             commentV2UseCase.readAllInfiniteScroll(
-                articleId = articleId,
+                postId = postId,
                 lastPath = lastPath,
                 pageSize = pageSize,
             )
@@ -61,7 +61,7 @@ class CommentHandlerV2(
     }
 
     suspend fun count(serverRequest: ServerRequest): ServerResponse {
-        val commentId = serverRequest.pathVariable("articleId").toLong()
-        return ok(commentV2UseCase.count(commentId))
+        val postId = serverRequest.pathVariable("postId").toLong()
+        return ok(commentV2UseCase.count(postId))
     }
 }

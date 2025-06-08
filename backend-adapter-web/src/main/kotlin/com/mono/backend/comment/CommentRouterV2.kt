@@ -11,7 +11,7 @@ class CommentRouterV2(
     @Bean
     fun commentRoutesV2(): CoRouterFunctionDsl.() -> Unit = {
         GET("/infinite-scroll", commentHandlerV2::readAllInfiniteScroll)
-        GET("/articles/{articleId}/count", commentHandlerV2::count)
+        GET("/posts/{postId}/count", commentHandlerV2::count)
         GET("/{commentId}", commentHandlerV2::read)
         DELETE("/{commentId}", commentHandlerV2::delete)
         PUT("/{commentId}", commentHandlerV2::update)

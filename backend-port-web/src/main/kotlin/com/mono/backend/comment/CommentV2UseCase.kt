@@ -10,7 +10,7 @@ interface CommentV2UseCase {
     suspend fun read(commentId: Long): CommentResponseV2?
     suspend fun update(commentId: Long, request: CommentUpdateRequest): CommentResponseV2
     suspend fun delete(commentId: Long)
-    suspend fun readAll(articleId: Long, page: Long, pageSize: Long): CommentPageResponseV2
-    suspend fun readAllInfiniteScroll(articleId: Long, lastPath: String?, pageSize: Long): List<CommentResponseV2>
-    suspend fun count(articleId: Long): Long
+    suspend fun readAll(postId: Long, page: Long, pageSize: Long): CommentPageResponseV2
+    suspend fun readAllInfiniteScroll(postId: Long, lastPath: String?, pageSize: Long): List<CommentResponseV2>
+    suspend fun count(postId: Long): Long
 }

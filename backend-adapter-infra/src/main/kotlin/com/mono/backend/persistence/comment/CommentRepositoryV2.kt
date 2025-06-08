@@ -13,12 +13,12 @@ interface CommentRepositoryV2 : CoroutineCrudRepository<CommentV2Entity, Long> {
     @Query(
         value = """
             SELECT path FROM comment_v2 
-            WHERE article_id = :articleId AND path > :pathPrefix AND path LIKE CONCAT(:pathPrefix, '%') 
+            WHERE post_id = :postId AND path > :pathPrefix AND path LIKE CONCAT(:pathPrefix, '%') 
             ORDER BY path DESC LIMIT 1
         """
     )
     suspend fun findDescendantsTopPath(
-        @Param("articleId") articleId: Long,
+        @Param("postId") postId: Long,
         @Param("pathPrefix") pathPrefix: String
     ): String?
 
@@ -27,14 +27,14 @@ interface CommentRepositoryV2 : CoroutineCrudRepository<CommentV2Entity, Long> {
             SELECT *
             FROM (
                 SELECT comment_id as t_comment_id FROM comment_v2 
-                WHERE article_id = :articleId 
+                WHERE post_id = :postId 
                 ORDER BY path ASC 
                 LIMIT :limit OFFSET :offset 
             ) t LEFT JOIN comment_v2 ON t.t_comment_id = comment_v2.comment_id
         """
     )
     suspend fun findAll(
-        @Param("articleId") articleId: Long,
+        @Param("postId") postId: Long,
         @Param("offset") offset: Long,
         @Param("limit") limit: Long
     ): List<CommentV2Entity>
@@ -42,38 +42,38 @@ interface CommentRepositoryV2 : CoroutineCrudRepository<CommentV2Entity, Long> {
     @Query(
         value = """
             SELECT count(*) FROM (
-                SELECT comment_id FROM comment_v2 WHERE article_id = :articleId LIMIT :limit 
+                SELECT comment_id FROM comment_v2 WHERE post_id = :postId LIMIT :limit 
             ) t
         """
     )
     suspend fun count(
-        @Param("articleId") articleId: Long,
+        @Param("postId") postId: Long,
         @Param("limit") limit: Long
     ): Long
 
     @Query(
         value = """
             SELECT * FROM comment_v2 
-            WHERE article_id = :articleId 
+            WHERE post_id = :postId 
             ORDER BY path ASC 
             LIMIT :limit
         """
     )
     suspend fun findAllInfiniteScroll(
-        @Param("articleId") articleId: Long,
+        @Param("postId") postId: Long,
         @Param("limit") limit: Long
     ): List<CommentV2Entity>
 
     @Query(
         value = """
             SELECT * FROM comment_v2 
-            WHERE article_id = :articleId AND path > :lastPath 
+            WHERE post_id = :postId AND path > :lastPath 
             ORDER BY path ASC 
             LIMIT :limit
         """
     )
     suspend fun findAllInfiniteScroll(
-        @Param("articleId") articleId: Long,
+        @Param("postId") postId: Long,
         @Param("lastPath") lastPath: String,
         @Param("limit") limit: Long
     ): List<CommentV2Entity>

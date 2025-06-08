@@ -7,16 +7,16 @@ import org.springframework.web.reactive.function.server.ServerResponse
 
 @Component
 class ViewHandler(
-    private val articleViewUseCase: ArticleViewUseCase,
+    private val postViewUseCase: PostViewUseCase,
 ): DefaultHandler {
     suspend fun increase(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.pathVariable("articleId").toLong()
-        val userId = serverRequest.pathVariable("userId").toLong()
-        return articleViewUseCase.increase(articleId, userId)?.let { ok(it) } ?: noContent()
+        val postId = serverRequest.pathVariable("postId").toLong()
+        val memberId = serverRequest.pathVariable("memberId").toLong()
+        return postViewUseCase.increase(postId, memberId)?.let { ok(it) } ?: noContent()
     }
 
     suspend fun count(serverRequest: ServerRequest): ServerResponse {
-        val articleId = serverRequest.pathVariable("articleId").toLong()
-        return ok(articleViewUseCase.count(articleId))
+        val postId = serverRequest.pathVariable("postId").toLong()
+        return ok(postViewUseCase.count(postId))
     }
 }

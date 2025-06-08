@@ -8,23 +8,23 @@ data class CommentDeletedEventPayload(
     val commentId: Long = 0,
     val content: String = "",
     val path: String = "",
-    val articleId: Long = 0,
+    val postId: Long = 0,
     val writerId: Long = 0,
     val deleted: Boolean = false,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now(),
-    val articleCommentCount: Long = 0
+    val postCommentCount: Long = 0
 ) : EventPayload {
     companion object {
         fun from(commentV2: CommentV2, count: Long) = CommentDeletedEventPayload(
             commentId = commentV2.commentId,
             content = commentV2.content,
-            articleId = commentV2.articleId,
+            postId = commentV2.postId,
             writerId = commentV2.writerId,
             deleted = commentV2.deleted,
             createdAt = commentV2.createdAt!!,
             updatedAt = commentV2.updatedAt!!,
-            articleCommentCount = count
+            postCommentCount = count
         )
     }
 }

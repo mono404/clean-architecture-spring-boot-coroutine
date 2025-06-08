@@ -56,7 +56,7 @@ class CommentService(
     }
 
     private suspend fun hasChildren(comment: Comment): Boolean {
-        return commentPersistencePort.countBy(comment.articleId, comment.commentId, 2L) == 2L
+        return commentPersistencePort.countBy(comment.postId, comment.commentId, 2L) == 2L
     }
 
     private suspend fun delete(comment: Comment) {
@@ -68,13 +68,13 @@ class CommentService(
         }
     }
 
-    override suspend fun readAll(articleId: Long, page: Long, pageSize: Long): CommentPageResponse = coroutineScope {
+    override suspend fun readAll(postId: Long, page: Long, pageSize: Long): CommentPageResponse = coroutineScope {
         val comment = async {
-            commentPersistencePort.findAll(articleId, (page - 1) * pageSize, pageSize)
+            commentPersistencePort.findAll(postId, (page - 1) * pageSize, pageSize)
                 .map(CommentResponse::from)
         }
         val commentCount = async {
-            commentPersistencePort.count(articleId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L))
+            commentPersistencePort.count(postId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L))
         }
         CommentPageResponse(
             comment.await(),
@@ -83,15 +83,15 @@ class CommentService(
     }
 
     override suspend fun readAllInfiniteScroll(
-        articleId: Long,
+        postId: Long,
         lastParentCommentId: Long?,
         lastCommentId: Long?,
         limit: Long
     ): List<CommentResponse> {
         val comments = if (lastParentCommentId == null || lastCommentId == null)
-            commentPersistencePort.findAllInfiniteScroll(articleId, limit)
+            commentPersistencePort.findAllInfiniteScroll(postId, limit)
         else
-            commentPersistencePort.findAllInfiniteScroll(articleId, lastParentCommentId, lastCommentId, limit)
+            commentPersistencePort.findAllInfiniteScroll(postId, lastParentCommentId, lastCommentId, limit)
 
         return comments.map(CommentResponse::from)
     }

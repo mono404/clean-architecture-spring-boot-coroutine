@@ -10,9 +10,9 @@ interface CommentUseCase {
     suspend fun read(commentId: Long): CommentResponse?
     suspend fun update(commentId: Long, request: CommentUpdateRequest): CommentResponse
     suspend fun delete(commentId: Long)
-    suspend fun readAll(articleId: Long, page: Long, pageSize: Long): CommentPageResponse
+    suspend fun readAll(postId: Long, page: Long, pageSize: Long): CommentPageResponse
     suspend fun readAllInfiniteScroll(
-        articleId: Long,
+        postId: Long,
         lastParentCommentId: Long?,
         lastCommentId: Long?,
         limit: Long

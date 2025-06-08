@@ -11,13 +11,13 @@ interface CommentRepository : CoroutineCrudRepository<CommentEntity, Long> {
         value = """
             SELECT count(*) FROM (
                 SELECT comment_id FROM comment
-                WHERE article_id = :articleId AND parent_comment_id = :parentCommentId
+                WHERE post_id = :postId AND parent_comment_id = :parentCommentId
                 LIMIT :limit
             ) t
         """
     )
     suspend fun countBy(
-        @Param("articleId") articleId: Long,
+        @Param("postId") postId: Long,
         @Param("parentCommentId") parentCommentId: Long,
         @Param("limit") limit: Long,
     ): Long
@@ -26,14 +26,14 @@ interface CommentRepository : CoroutineCrudRepository<CommentEntity, Long> {
         value = """
             SELECT * FROM (
                 SELECT comment_id as t_comment_id FROM comment 
-                WHERE article_id = :articleId 
+                WHERE post_id = :postId 
                 ORDER BY parent_comment_id asc, comment_id desc 
                 LIMIT :limit OFFSET :offset
             ) t left join comment on t.t_comment_id = comment.comment_id
         """
     )
     suspend fun findAll(
-        articleId: Long,
+        postId: Long,
         offset: Long,
         limit: Long,
     ): List<CommentEntity>
@@ -42,33 +42,33 @@ interface CommentRepository : CoroutineCrudRepository<CommentEntity, Long> {
         value = """
             SELECT count(*) FROM (
                 SELECT comment_id FROM comment
-                WHERE article_id = :articleId
+                WHERE post_id = :postId
                 LIMIT :limit
             ) t
         """
     )
     suspend fun count(
-        articleId: Long,
+        postId: Long,
         limit: Long
     ): Long
 
     @Query(
         value = """
             SELECT * FROM comment
-            WHERE article_id = :articleId
+            WHERE post_id = :postId
             ORDER BY parent_comment_id asc, comment_id asc
             LIMIT :limit
         """
     )
     suspend fun findAllInfiniteScroll(
-        articleId: Long,
+        postId: Long,
         limit: Long,
     ): List<CommentEntity>
 
     @Query(
         value = """
             SELECT * FROM comment
-            WHERE article_id = :articleId AND (
+            WHERE post_id = :postId AND (
                 parent_comment_id > :lastParentCommentId OR
                 (parent_comment_id = :lastParentCommentId AND comment_id > :lastCommentId) 
             )
@@ -77,7 +77,7 @@ interface CommentRepository : CoroutineCrudRepository<CommentEntity, Long> {
         """
     )
     suspend fun findAllInfiniteScroll(
-        articleId: Long,
+        postId: Long,
         lastCommentId: Long,
         lastParentCommentId: Long,
         limit: Long,

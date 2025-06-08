@@ -31,4 +31,6 @@ dependencies {
 
     api("org.springframework.boot:spring-boot-starter-test:3.4.5")
     api("org.junit.platform:junit-platform-launcher:1.12.2")
+
+    api("org.springframework:spring-web:6.2.7")
 }

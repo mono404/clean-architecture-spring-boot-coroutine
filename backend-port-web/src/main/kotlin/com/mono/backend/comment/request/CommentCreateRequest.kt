@@ -3,7 +3,7 @@ package com.mono.backend.comment.request
 import com.mono.backend.comment.Comment
 
 data class CommentCreateRequest(
-    val articleId: Long,
+    val postId: Long,
     val content: String,
     val parentCommentId: Long?,
     val writerId: Long
@@ -13,7 +13,7 @@ data class CommentCreateRequest(
             commentId = commentId,
             content = content,
             parentCommentId = parent?.parentCommentId,
-            articleId = articleId,
+            postId = postId,
             writerId = writerId
         )
     }

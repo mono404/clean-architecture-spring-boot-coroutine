@@ -8,3 +8,8 @@ spring:
     r2dbc:
       repositories:
         enabled: true
+
+aws:
+  region: ap-northeast-2
+  s3:
+    bucket-name: backend

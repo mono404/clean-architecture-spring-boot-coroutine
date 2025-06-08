@@ -20,6 +20,11 @@ interface DefaultHandler {
         .bodyValue(body)
         .awaitSingle()
 
+    suspend fun accepted(body: Any): ServerResponse = ServerResponse
+        .accepted()
+        .json()
+        .bodyValueAndAwait(body)
+
     suspend fun noContent(): ServerResponse = ServerResponse
         .noContent()
         .buildAndAwait()

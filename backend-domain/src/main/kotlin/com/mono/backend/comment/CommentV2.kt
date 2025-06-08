@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 data class CommentV2(
     val commentId: Long,
     val content: String,
-    val articleId: Long,
+    val postId: Long,
     val writerId: Long,
     val commentPath: CommentPath,
     var deleted: Boolean = false,

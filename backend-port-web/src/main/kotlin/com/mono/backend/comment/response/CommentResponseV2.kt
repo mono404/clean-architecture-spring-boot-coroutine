@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 data class CommentResponseV2(
     val commentId: Long,
     val content: String,
-    val articleId: Long,
+    val postId: Long,
     val writerId: Long,
     var deleted: Boolean,
     val path: String,
@@ -18,7 +18,7 @@ data class CommentResponseV2(
             return CommentResponseV2(
                 commentId = comment.commentId,
                 content = comment.content,
-                articleId = comment.articleId,
+                postId = comment.postId,
                 writerId = comment.writerId,
                 deleted = comment.deleted,
                 path = comment.commentPath.path,

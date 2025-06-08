@@ -18,8 +18,8 @@ class AuthService(
 ) : AuthUseCase {
     override suspend fun loginOrJoin(request: SocialLoginRequest): UpsertResponse<LoginResponse> {
         val verifier = selectVerifier(request.provider)
-        val userInfo = verifier.verify(request.accessToken)
-        val member = memberService.findByOAuth(userInfo)
+        val memberInfo = verifier.verify(request.accessToken)
+        val member = memberService.findByOAuth(memberInfo)
 
         return if (member != null) {
             val accessToken = jwtTokenUseCase.createAccessToken(member)
@@ -33,7 +33,7 @@ class AuthService(
                 )
             )
         } else {
-            val newMember = memberService.join(userInfo.provider, userInfo.providerId)
+            val newMember = memberService.join(memberInfo.provider, memberInfo.providerId)
             val accessToken = jwtTokenUseCase.createAccessToken(newMember)
             val (refreshToken, refreshExp) = jwtTokenUseCase.createRefreshToken(newMember)
             refreshTokenPersistencePort.upsert(newMember.memberId, request.deviceId, refreshToken, refreshExp)
@@ -84,3 +84,4 @@ class AuthService(
         return oAuthVerifiers.first { it.support(provider) }
     }
 }
+//185963569776553984

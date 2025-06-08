@@ -6,17 +6,17 @@ data class Comment(
     val commentId: Long,
     val content: String,
     val parentCommentId: Long,
-    val articleId: Long,
+    val postId: Long,
     val writerId: Long,
     var deleted: Boolean = false,
     var createdAt: LocalDateTime? = null,
     var updatedAt: LocalDateTime? = null,
 ) {
-    constructor(commentId: Long, content: String, parentCommentId: Long?, articleId: Long, writerId: Long) : this(
+    constructor(commentId: Long, content: String, parentCommentId: Long?, postId: Long, writerId: Long) : this(
         commentId = commentId,
         content = content,
         parentCommentId = parentCommentId ?: commentId,
-        articleId = articleId,
+        postId = postId,
         writerId = writerId,
     )
 

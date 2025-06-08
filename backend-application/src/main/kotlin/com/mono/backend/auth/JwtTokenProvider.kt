@@ -21,8 +21,9 @@ class JwtTokenProvider(
     private val secret: String
 ) : JwtTokenUseCase {
     companion object {
-        private const val ACCESS_TOKEN_VALIDITY_SECONDS: Long = 60 * 60 * 1000 // 1 hour
-        private const val REFRESH_TOKEN_VALIDITY_SECONDS: Long = 60 * 60 * 24 * 1000 // 24 hours
+        private const val DAY: Long = 60 * 60 * 1000 * 24
+        private const val ACCESS_TOKEN_VALIDITY_SECONDS: Long = DAY // 1d
+        private const val REFRESH_TOKEN_VALIDITY_SECONDS: Long = DAY * 7 // 7d
     }
 
     private val keyBytes = Decoders.BASE64.decode(secret)
@@ -61,15 +62,15 @@ class JwtTokenProvider(
 
     override fun getAuthentication(token: String): Authentication {
         val claims = getClaims(token)
-        val userId = claims.subject?.toLong()
+        val memberId = claims.subject?.toLong()
         val role = claims["role"] as String?
 
         val authorities = when (role) {
-            MemberRole.ADMIN.name -> listOf("ROLE_ADMIN", "ROLE_USER")
-            MemberRole.MEMBER.name -> listOf("ROLE_USER")
+            MemberRole.ADMIN.name -> listOf("ROLE_ADMIN", "ROLE_MEMBER")
+            MemberRole.MEMBER.name -> listOf("ROLE_MEMBER")
             else -> listOf()
         }.map { SimpleGrantedAuthority(it) }
-        return UsernamePasswordAuthenticationToken(userId, null, authorities)
+        return UsernamePasswordAuthenticationToken(memberId, null, authorities)
     }
 
     private fun getClaims(token: String) =
