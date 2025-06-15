@@ -1,5 +1,7 @@
 package com.mono.backend.post
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.mono.backend.FileStoragePort
 import com.mono.backend.event.EventType
 import com.mono.backend.event.payload.PostCreatedEventPayload
@@ -16,40 +18,36 @@ import com.mono.backend.snowflake.Snowflake
 import com.mono.backend.transaction.transaction
 import com.mono.backend.util.PageLimitCalculator
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
-import java.util.*
 
 @Service
 class PostCommandService(
     private val postPersistencePort: PostPersistencePort,
     private val boardPostCountPersistencePort: BoardPostCountPersistencePort,
     private val postEventDispatcherPort: PostEventDispatcherPort,
-    private val fileStoragePort: FileStoragePort
+    private val fileStoragePort: FileStoragePort,
+    private val objectMapper: ObjectMapper
 ) : PostCommandUseCase {
-    override suspend fun create(request: PostCreateRequest, mediaFiles: List<FilePart>?): PostResponse = coroutineScope {
+    override suspend fun create(
+        request: PostCreateRequest,
+        mediaFiles: List<FilePart>?,
+        fileSizes: List<Long>?
+    ): PostResponse = coroutineScope {
         transaction {
-            val postDeferred = async { postPersistencePort.save(request.toDomain(Snowflake.nextId())) }
+            val blobIds = extractBlobIds(request.content)
+            val uploadedUrlMap = uploadFilesAsync(mediaFiles!!, fileSizes!!, blobIds)
+            val content = replaceBlobUrls(request.content, uploadedUrlMap)
+
+            val postCreateRequest = request.copy(content = content)
+            val postDeferred = async { postPersistencePort.save(postCreateRequest.toDomain(Snowflake.nextId())) }
 
             launch {
                 boardPostCountPersistencePort.increase(request.boardId).takeIf { it == 0 }?.let {
                     boardPostCountPersistencePort.save(BoardPostCount(request.boardId, 1L))
-                }
-            }
-
-            val uploadedUrls = mutableListOf<String>()
-            if (mediaFiles != null) {
-                for(filePart in mediaFiles) {
-                    val originFilename = filePart.filename()
-                    val extension = originFilename.substringAfterLast('.', "")
-                    val uuid = UUID.randomUUID().toString()
-                    val key = "posts/${LocalDateTime.now().year}/${uuid}.$extension"
-
-                    val fileUrl = fileStoragePort.store(key, filePart)
-                    uploadedUrls.add(fileUrl)
                 }
             }
 
@@ -60,6 +58,22 @@ class PostCommandService(
                 payload = PostCreatedEventPayload.from(post, count(post.boardId))
             )
             PostResponse.from(post)
+        }
+    }
+
+    private suspend fun uploadFilesAsync(mediaFiles: List<FilePart>, fileSizes: List<Long>, blobIds: List<String>): Map<String, String> {
+        require(mediaFiles.size == fileSizes.size && mediaFiles.size == blobIds.size)
+
+        return coroutineScope {
+            mediaFiles.mapIndexed { index, filePart ->
+                val blobId = blobIds[index]
+                val fileSize = fileSizes[index]
+
+                async {
+                    val uploadedUrl = fileStoragePort.store(blobId, filePart, fileSize)
+                    blobId to uploadedUrl
+                }
+            }.awaitAll().toMap()
         }
     }
 
@@ -108,7 +122,7 @@ class PostCommandService(
     }
 
     suspend fun readAllInfiniteScroll(boardId: Long, lastPostId: Long?, pageSize: Long): List<PostResponse> {
-        val posts = if(boardId == 0L) {
+        val posts = if (boardId == 0L) {
             postPersistencePort.findAllInfiniteScroll(pageSize)
         } else {
             if (lastPostId == null)
@@ -122,5 +136,50 @@ class PostCommandService(
 
     override suspend fun count(boardId: Long): Long {
         return boardPostCountPersistencePort.findById(boardId)?.postCount ?: 0
+    }
+
+    fun extractBlobIdFromFilename(filename: String): String {
+        return filename.substringBeforeLast(".").substringAfter("blob-")
+    }
+
+    fun replaceBlobUrls(deltaJson: String, uploadedUrlMap: Map<String, String>): String {
+        val nodes = objectMapper.readTree(deltaJson)
+
+        for (node in nodes) {
+            val insertNode = node["insert"]
+            listOf("image", "video").forEach { mediaType ->
+                if (insertNode?.has(mediaType) == true) {
+                    val url = insertNode[mediaType].asText()
+                    if (url.startsWith("blob:")) {
+                        val blobId = url.substringAfter("blob:")
+                        val uploadedUrl = uploadedUrlMap[blobId]
+                        if(uploadedUrl != null) {
+                            (insertNode as ObjectNode).put(mediaType, uploadedUrl)
+                        }
+                    }
+                }
+            }
+        }
+        return objectMapper.writeValueAsString(nodes)
+    }
+
+    fun extractBlobIds(deltaJson: String): List<String> {
+        val nodes = objectMapper.readTree(deltaJson)
+
+        val ids = mutableListOf<String>()
+
+        for (node in nodes) {
+            val insertNode = node["insert"]
+            listOf("image", "video").forEach { mediaType ->
+                if (insertNode?.has(mediaType) == true) {
+                    val url = insertNode[mediaType].asText()
+                    if (url.startsWith("blob:")) {
+                        val blobId = url.substringAfter("blob:")
+                        ids.add(blobId)
+                    }
+                }
+            }
+        }
+        return ids
     }
 }

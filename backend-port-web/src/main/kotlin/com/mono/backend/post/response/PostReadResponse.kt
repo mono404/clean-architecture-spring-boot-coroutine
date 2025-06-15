@@ -4,7 +4,7 @@ import com.mono.backend.post.PostQueryModel
 import java.time.LocalDateTime
 
 data class PostReadResponse(
-    val postId: Long,
+    val postId: String,
     var title: String,
     var content: String,
     var boardId: Long,
@@ -18,7 +18,7 @@ data class PostReadResponse(
     companion object {
         fun from(postQueryModel: PostQueryModel, viewCount: Long): PostReadResponse {
             return PostReadResponse(
-                postId = postQueryModel.postId,
+                postId = postQueryModel.postId.toString(),
                 title = postQueryModel.title,
                 content = postQueryModel.content,
                 boardId = postQueryModel.boardId,

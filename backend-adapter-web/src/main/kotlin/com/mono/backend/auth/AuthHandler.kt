@@ -32,4 +32,8 @@ class AuthHandler(
         authUseCase.logout(refreshTokenRequest)
         return noContent()
     }
+
+    suspend fun test(serverRequest: ServerRequest): ServerResponse {
+        return ok(authUseCase.test())
+    }
 }

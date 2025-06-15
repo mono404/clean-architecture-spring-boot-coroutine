@@ -5,6 +5,7 @@ import com.mono.backend.log.logger
 import com.mono.backend.post.request.PostCreateRequest
 import com.mono.backend.post.request.PostUpdateRequest
 import org.springframework.http.codec.multipart.FilePart
+import org.springframework.http.codec.multipart.FormFieldPart
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
@@ -42,14 +43,13 @@ class PostHandler(
         val memberId = serverRequest.attribute("memberId").get() as Long
         val parts = serverRequest.awaitMultipartData()
         val request = PostCreateRequest.fromPart(parts, memberId)
+        println(parts)
         val files = parts["mediaFiles"]?.filterIsInstance<FilePart>()
+        val fileSizes = parts["mediaFileSizes"]?.filterIsInstance<FormFieldPart>()?.map { it.value().toLong() }
+        println(files)
+        println(fileSizes)
 
-//        val postRequest = (parts["postCreatedRequest"]?.firstOrNull() as? FormFieldPart)?.value()
-//        println("postRequest = $postRequest")
-//        val postDto = objectMapper.readValue(postRequest, PostCreateRequest::class.java)
-//        println("postDto = $postDto")
-
-        return ok(postCommandUseCase.create(request, files))
+        return ok(postCommandUseCase.create(request, files, fileSizes))
     }
 
     suspend fun update(serverRequest: ServerRequest): ServerResponse {

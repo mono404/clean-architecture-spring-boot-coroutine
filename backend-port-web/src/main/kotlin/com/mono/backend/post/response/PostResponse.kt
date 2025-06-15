@@ -5,7 +5,7 @@ import com.mono.backend.post.PostQueryModel
 import java.time.LocalDateTime
 
 data class PostResponse(
-    val postId: Long,
+    val postId: String,
     val title: String,
     val content: String,
     val boardId: Long, // 게시판 아이디
@@ -15,7 +15,7 @@ data class PostResponse(
 ) {
     fun toDomain(commentCount: Long, likeCount: Long): PostQueryModel {
         return PostQueryModel(
-            postId = postId,
+            postId = postId.toLong(),
             title = title,
             content = content,
             boardId = boardId,
@@ -30,7 +30,7 @@ data class PostResponse(
     companion object {
         fun from(post: Post): PostResponse {
             return PostResponse(
-                postId = post.postId,
+                postId = post.postId.toString(),
                 title = post.title,
                 content = post.content,
                 boardId = post.boardId,

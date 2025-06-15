@@ -87,7 +87,7 @@ class PostQueryService(
             return postIds
         }
         log.info("[PostReadService.readAllPostIds] return origin data.")
-        return postCommandService.readAll(boardId, page, pageSize).posts.map { it.postId }
+        return postCommandService.readAll(boardId, page, pageSize).posts.map { it.postId.toLong() }
     }
 
     override suspend fun count(boardId: Long): Long {
@@ -117,6 +117,6 @@ class PostQueryService(
         }
 
         log.info("[PostReadService.readAllInfiniteScrollPostIds] return origin data.")
-        return postCommandService.readAllInfiniteScroll(boardId, lastPostId, pageSize).map { it.postId }
+        return postCommandService.readAllInfiniteScroll(boardId, lastPostId, pageSize).map { it.postId.toLong() }
     }
 }

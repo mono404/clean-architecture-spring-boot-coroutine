@@ -14,11 +14,14 @@ import java.nio.ByteBuffer
 class S3FileStorage(
     private val s3Client: S3AsyncClient,
     @Value("\${aws.s3.bucket-name}") private val bucketName: String,
+    @Value("\${aws.s3.localEndpoint}") private val localEndpoint: String,
 ) : FileStoragePort {
-    override suspend fun store(path: String, file: FilePart): String {
+    override suspend fun store(path: String, file: FilePart, fileSize: Long): String {
+        s3Client.createBucket { it.bucket(bucketName) }.await() // create bucket if not exists
         val request = PutObjectRequest.builder()
             .bucket(bucketName)
             .key(path)
+            .contentLength(fileSize)
             .acl("public-read")
             .build()
 
@@ -38,9 +41,10 @@ class S3FileStorage(
 
         val asyncBody = AsyncRequestBody.fromPublisher(publisher)
 
-        s3Client.putObject(request, asyncBody).await()
+        val response = s3Client.putObject(request, asyncBody).await()
+        println(response)
+        println(path)
 
-        return ""
+        return "$localEndpoint/$bucketName/$path"
     }
-
 }

@@ -10,6 +10,7 @@ class AuthRouter(
 ) {
     @Bean
     fun authRoutes(): CoRouterFunctionDsl.() -> Unit = {
+        GET("/test", authHandler::test)
         POST("/social-login", authHandler::login)
         POST("/refresh", authHandler::refresh)
         POST("/logout", authHandler::logout)

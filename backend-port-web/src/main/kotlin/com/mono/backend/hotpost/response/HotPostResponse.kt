@@ -4,7 +4,7 @@ import com.mono.backend.post.response.PostReadResponse
 import java.time.LocalDateTime
 
 data class HotPostResponse(
-    val postId: Long,
+    val postId: String,
     val title: String,
     val createdAt: LocalDateTime
 ) {

@@ -2,12 +2,11 @@ package com.mono.backend.auth
 
 import com.mono.backend.UpsertResponse
 import com.mono.backend.exceptions.UnauthorizedException
-import com.mono.backend.member.MemberResponse
-import com.mono.backend.member.MemberService
-import com.mono.backend.member.SocialProvider
+import com.mono.backend.member.*
 import com.mono.backend.persistence.refreshtoken.RefreshTokenPersistencePort
 import com.mono.backend.webclient.oauth.OAuthTokenVerifier
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class AuthService(
@@ -80,8 +79,22 @@ class AuthService(
         refreshTokenPersistencePort.delete(memberId, request.deviceId)
     }
 
+    override suspend fun test(): Tokens {
+        val member = Member(
+            memberId = 123456789,
+            providerId = "test",
+            provider = SocialProvider.KAKAO,
+            nickname = "test",
+            profileImageUrl = "test",
+            role = MemberRole.ADMIN,
+            createdAt = LocalDateTime.now()
+        )
+        val accessToken = jwtTokenUseCase.createAccessToken(member)
+        val (refreshToken, _) = jwtTokenUseCase.createRefreshToken(member)
+        return Tokens(accessToken, refreshToken)
+    }
+
     private fun selectVerifier(provider: SocialProvider): OAuthTokenVerifier {
         return oAuthVerifiers.first { it.support(provider) }
     }
 }
-//185963569776553984

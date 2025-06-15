@@ -11,7 +11,7 @@ import java.time.Duration
 @Repository
 class PostQueryModelCacheAdapter(
     private val redisTemplate: ReactiveStringRedisTemplate
-): PostQueryModelCachePort {
+) : PostQueryModelCachePort {
     companion object {
         const val KEY_FORMAT = "post-read::post::%s"
     }
@@ -45,8 +45,8 @@ class PostQueryModelCacheAdapter(
 
     override suspend fun readAll(postIds: List<Long>): List<PostQueryModel>? {
         val keyList = postIds.map(this::generateKey)
-        if(keyList.isEmpty()) return null
-        return redisTemplate.opsForValue().multiGet(keyList).awaitSingleOrNull()
-            ?.mapNotNull { json -> DataSerializer.deserialize(json, PostQueryModel::class.java) }
+        return keyList.takeIf { it.isNotEmpty() }
+            ?.let { keys -> redisTemplate.opsForValue().multiGet(keys).awaitSingleOrNull() }
+            ?.mapNotNull { json -> json?.let { DataSerializer.deserialize(it, PostQueryModel::class.java) } }
     }
 }
