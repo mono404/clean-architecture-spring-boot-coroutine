@@ -1,6 +1,6 @@
 spring:
   r2dbc:
-    url: r2dbc:pool:mysql://10.251.63.114:3306/backend?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    url: r2dbc:pool:mysql://127.0.0.1:3306/backend?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: root
     password: 1234
 
@@ -16,4 +16,5 @@ aws:
     region: us-east-1
     numRetries: 2
     bucketName: wonho-bucket
+    multipartMinPartSize: 5242880
 

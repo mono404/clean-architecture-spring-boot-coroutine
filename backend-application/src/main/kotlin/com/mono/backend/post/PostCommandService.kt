@@ -2,7 +2,6 @@ package com.mono.backend.post
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.mono.backend.FileStoragePort
 import com.mono.backend.event.EventType
 import com.mono.backend.event.payload.PostCreatedEventPayload
 import com.mono.backend.event.payload.PostDeletedEventPayload
@@ -14,6 +13,7 @@ import com.mono.backend.post.request.PostCreateRequest
 import com.mono.backend.post.request.PostUpdateRequest
 import com.mono.backend.post.response.PostPageResponse
 import com.mono.backend.post.response.PostResponse
+import com.mono.backend.s3client.S3UploadClientPort
 import com.mono.backend.snowflake.Snowflake
 import com.mono.backend.transaction.transaction
 import com.mono.backend.util.PageLimitCalculator
@@ -29,17 +29,16 @@ class PostCommandService(
     private val postPersistencePort: PostPersistencePort,
     private val boardPostCountPersistencePort: BoardPostCountPersistencePort,
     private val postEventDispatcherPort: PostEventDispatcherPort,
-    private val fileStoragePort: FileStoragePort,
+    private val s3UploadClientPort: S3UploadClientPort,
     private val objectMapper: ObjectMapper
 ) : PostCommandUseCase {
     override suspend fun create(
         request: PostCreateRequest,
-        mediaFiles: List<FilePart>?,
-        fileSizes: List<Long>?
+        mediaFiles: List<FilePart>?
     ): PostResponse = coroutineScope {
         transaction {
             val blobIds = extractBlobIds(request.content)
-            val uploadedUrlMap = uploadFilesAsync(mediaFiles!!, fileSizes!!, blobIds)
+            val uploadedUrlMap = uploadFilesAsync(mediaFiles!!, blobIds)
             val content = replaceBlobUrls(request.content, uploadedUrlMap)
 
             val postCreateRequest = request.copy(content = content)
@@ -61,17 +60,20 @@ class PostCommandService(
         }
     }
 
-    private suspend fun uploadFilesAsync(mediaFiles: List<FilePart>, fileSizes: List<Long>, blobIds: List<String>): Map<String, String> {
-        require(mediaFiles.size == fileSizes.size && mediaFiles.size == blobIds.size)
+    private suspend fun uploadFilesAsync(
+        mediaFiles: List<FilePart>,
+        blobIds: List<String>
+    ): Map<String, String> {
+        require(mediaFiles.size == blobIds.size)
 
         return coroutineScope {
             mediaFiles.mapIndexed { index, filePart ->
-                val blobId = blobIds[index]
-                val fileSize = fileSizes[index]
-
                 async {
-                    val uploadedUrl = fileStoragePort.store(blobId, filePart, fileSize)
-                    blobId to uploadedUrl
+                    val fileResponse =
+                        s3UploadClientPort.upload(filePart.filename(), filePart) { uploaded, total ->
+                            println("Uploaded $uploaded/$total bytes")
+                        }
+                    blobIds[index] to fileResponse.path
                 }
             }.awaitAll().toMap()
         }
@@ -150,12 +152,9 @@ class PostCommandService(
             listOf("image", "video").forEach { mediaType ->
                 if (insertNode?.has(mediaType) == true) {
                     val url = insertNode[mediaType].asText()
-                    if (url.startsWith("blob:")) {
-                        val blobId = url.substringAfter("blob:")
-                        val uploadedUrl = uploadedUrlMap[blobId]
-                        if(uploadedUrl != null) {
-                            (insertNode as ObjectNode).put(mediaType, uploadedUrl)
-                        }
+                    val uploadedUrl = uploadedUrlMap[url]
+                    if (uploadedUrl != null) {
+                        (insertNode as ObjectNode).put(mediaType, uploadedUrl)
                     }
                 }
             }
@@ -173,10 +172,8 @@ class PostCommandService(
             listOf("image", "video").forEach { mediaType ->
                 if (insertNode?.has(mediaType) == true) {
                     val url = insertNode[mediaType].asText()
-                    if (url.startsWith("blob:")) {
-                        val blobId = url.substringAfter("blob:")
-                        ids.add(blobId)
-                    }
+                    val blobId = url.substringAfter("blob:")
+                    ids.add(blobId)
                 }
             }
         }
