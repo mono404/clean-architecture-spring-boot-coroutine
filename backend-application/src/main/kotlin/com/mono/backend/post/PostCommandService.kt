@@ -140,10 +140,6 @@ class PostCommandService(
         return boardPostCountPersistencePort.findById(boardId)?.postCount ?: 0
     }
 
-    fun extractBlobIdFromFilename(filename: String): String {
-        return filename.substringBeforeLast(".").substringAfter("blob-")
-    }
-
     fun replaceBlobUrls(deltaJson: String, uploadedUrlMap: Map<String, String>): String {
         val nodes = objectMapper.readTree(deltaJson)
 
@@ -172,8 +168,7 @@ class PostCommandService(
             listOf("image", "video").forEach { mediaType ->
                 if (insertNode?.has(mediaType) == true) {
                     val url = insertNode[mediaType].asText()
-                    val blobId = url.substringAfter("blob:")
-                    ids.add(blobId)
+                    ids.add(url)
                 }
             }
         }

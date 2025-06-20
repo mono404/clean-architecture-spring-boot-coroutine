@@ -22,8 +22,8 @@ class JwtTokenProvider(
 ) : JwtTokenUseCase {
     companion object {
         private const val DAY: Long = 60 * 60 * 1000 * 24
-        private const val ACCESS_TOKEN_VALIDITY_SECONDS: Long = DAY // 1d
-        private const val REFRESH_TOKEN_VALIDITY_SECONDS: Long = DAY * 7 // 7d
+        private const val ACCESS_TOKEN_VALIDITY_SECONDS: Long = DAY * 7 // 1d
+        private const val REFRESH_TOKEN_VALIDITY_SECONDS: Long = DAY * 30 // 7d
     }
 
     private val keyBytes = Decoders.BASE64.decode(secret)

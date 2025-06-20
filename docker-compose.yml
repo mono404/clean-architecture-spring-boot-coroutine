@@ -10,8 +10,11 @@ services:
       - DEBUG=1
       - DOCKER_SOCK=unix:///var/run/docker.sock
       - DEFAULT_REGION="us-east-1"
+      - S3_SKIP_SIGNATURE_VALIDATION=1       # 서명 오류 무시 (테스트용)
+      - PERSISTENCE=0                        # 컨테이너 재시작 시 데이터 초기화
     volumes:
       - ./localstack:/etc/localstack/init/ready.d
+      - ./localstack/data:/var/lib/localstack'
       - /var/run/docker.sock:/var/run/docker.sock
   redis:
     container_name: mono-redis

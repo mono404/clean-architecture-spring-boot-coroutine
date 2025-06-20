@@ -3,7 +3,7 @@ package com.mono.backend.s3client.client
 import com.mono.backend.s3client.S3UploadClientPort
 import com.mono.backend.s3client.model.FileResponse
 import com.mono.backend.s3client.model.ProgressCallback
-import com.mono.backend.s3client.uploader.SmartUploader
+import com.mono.backend.s3client.uploader.S3Uploader
 import com.mono.backend.s3client.util.AwsSdkUtils
 import kotlinx.coroutines.future.await
 import org.springframework.beans.factory.annotation.Value
@@ -17,14 +17,14 @@ import software.amazon.awssdk.services.s3.model.HeadObjectRequest
 class S3UploadClient(
     private val s3Client: S3AsyncClient,
     @Value("\${aws.s3.bucket-name}") private val bucketName: String,
-    private val smartUploader: SmartUploader
+    private val s3Uploader: S3Uploader
 ) : S3UploadClientPort {
     override suspend fun upload(
         fileKey: String,
         file: FilePart,
         progressCallback: ProgressCallback?
     ): FileResponse {
-        return smartUploader.upload(fileKey, file, progressCallback)
+        return s3Uploader.upload(fileKey, file, progressCallback)
     }
 
     override suspend fun delete(fileKey: String) {
