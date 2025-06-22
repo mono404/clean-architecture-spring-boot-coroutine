@@ -8,18 +8,6 @@ import java.time.Instant
 class RefreshTokenPersistenceAdapter(
     private val refreshTokenRepository: RefreshTokenRepository
 ) : RefreshTokenPersistencePort {
-    override suspend fun save(memberId: Long, deviceId: String, token: String, expiresAt: Instant) {
-        refreshTokenRepository.save(
-            RefreshTokenEntity(
-                refreshTokenId = Snowflake.nextId(),
-                memberId = memberId,
-                deviceId = deviceId,
-                refreshToken = token,
-                expiresAt = expiresAt,
-            )
-        )
-    }
-
     override suspend fun upsert(memberId: Long, deviceId: String, token: String, expiresAt: Instant) {
         refreshTokenRepository.findByMemberIdAndDeviceId(memberId, deviceId)?.let { entity ->
             refreshTokenRepository.save(entity.copy(refreshToken = token, expiresAt = expiresAt))

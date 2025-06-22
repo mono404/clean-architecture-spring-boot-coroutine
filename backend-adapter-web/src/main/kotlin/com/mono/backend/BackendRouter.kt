@@ -4,6 +4,7 @@ import com.mono.backend.auth.AuthRouter
 import com.mono.backend.comment.CommentRouter
 import com.mono.backend.comment.CommentRouterV2
 import com.mono.backend.exrate.ExRateRouter
+import com.mono.backend.fcm.FcmRouter
 import com.mono.backend.hotpost.HotPostRouter
 import com.mono.backend.like.LikeRouter
 import com.mono.backend.member.MemberRouter
@@ -26,6 +27,7 @@ class BackendRouter(
     private val hotPostRouter: HotPostRouter,
     private val authRouter: AuthRouter,
     private val memberRouter: MemberRouter,
+    private val fcmRouter: FcmRouter
 ) {
     @Bean
     fun backendRoutes(): RouterFunction<ServerResponse> = coRouter {
@@ -42,6 +44,7 @@ class BackendRouter(
                 "/posts/{postId}".nest(viewRouter.viewRoutes())
             }
             "/hot-posts".nest(hotPostRouter.hotPostRoutes())
+            "/fcm-tokens".nest(fcmRouter.fcmRoutes())
         }
         "/v2".nest {
             "/comments".nest(commentRouterV2.commentRoutesV2())

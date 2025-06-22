@@ -14,5 +14,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     runtimeOnly("io.asyncer:r2dbc-mysql:1.3.0")
+
+    // Firebase Admin SDK
+    implementation("com.google.firebase:firebase-admin:9.5.0")
 //    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 }
