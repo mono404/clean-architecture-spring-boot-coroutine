@@ -1,5 +1,6 @@
 package com.mono.backend.s3client.uploader
 
+import com.mono.backend.infra.s3Client.uploader.S3Uploader
 import kotlinx.coroutines.runBlocking
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.http.codec.multipart.Part

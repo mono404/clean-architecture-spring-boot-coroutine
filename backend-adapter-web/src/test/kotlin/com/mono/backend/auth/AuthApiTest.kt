@@ -1,6 +1,8 @@
 package com.mono.backend.auth
 
-import com.mono.backend.member.SocialProvider
+import com.mono.backend.domain.member.SocialProvider
+import com.mono.backend.port.web.auth.LoginResponse
+import com.mono.backend.port.web.auth.SocialLoginRequest
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.springframework.web.client.RestClient

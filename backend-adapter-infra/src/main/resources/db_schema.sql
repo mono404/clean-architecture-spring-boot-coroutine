@@ -1,14 +1,14 @@
 #
 ************************************************************
 # Sequel Ace SQL dump
-# Version 20094
+# Version 20092
 #
 # https://sequel-ace.com/
 # https://github.com/Sequel-Ace/Sequel-Ace
 #
-# Host: 127.0.0.1 (MySQL 9.1.0)
+# Host: 10.251.63.114 (MySQL 9.2.0)
 # Database: backend
-# Generation Time: 2025-06-22 13:59:14 +0000
+# Generation Time: 2025-06-27 10:21:39 +0000
 # ************************************************************
 
 
@@ -119,6 +119,46 @@ CREATE TABLE `member`
     `created_at`        datetime     DEFAULT NULL,
     `updated_at`        datetime     DEFAULT NULL,
     PRIMARY KEY (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+
+#
+Dump of table notification
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `notification`;
+
+CREATE TABLE `notification`
+(
+    `notification_id`          bigint NOT NULL,
+    `member_id`                bigint NOT NULL,
+    `notification_template_id` bigint NOT NULL,
+    `is_read`                  tinyint(1) DEFAULT '0',
+    `created_at`               datetime DEFAULT NULL,
+    PRIMARY KEY (`notification_id`),
+    KEY                        `notification_template_id` (`notification_template_id`),
+    CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`notification_template_id`) REFERENCES `notification_template` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+
+#
+Dump of table notification_template
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `notification_template`;
+
+CREATE TABLE `notification_template`
+(
+    `id`         bigint        NOT NULL,
+    `type`       varchar(50)   NOT NULL,
+    `title`      varchar(255)  NOT NULL,
+    `body`       varchar(1000) NOT NULL,
+    `metadata`   json     DEFAULT NULL,
+    `ttl_days`   int      DEFAULT '3',
+    `created_at` datetime DEFAULT NULL,
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
@@ -243,6 +283,30 @@ CREATE TABLE `refresh_token`
     `created_at`       datetime                                                       DEFAULT NULL,
     PRIMARY KEY (`refresh_token_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+
+#
+Dump of table search_index
+# ------------------------------------------------------------
+
+DROP TABLE IF EXISTS `search_index`;
+
+CREATE TABLE `search_index`
+(
+    `search_index_id` bigint   NOT NULL,
+    `domain_id`       int      NOT NULL,
+    `board_id`        int      NOT NULL,
+    `title`           text,
+    `content`         text,
+    `comment`         text,
+    `created_at`      datetime NOT NULL,
+    `updated_at`      datetime NOT NULL,
+    PRIMARY KEY (`search_index_id`),
+    FULLTEXT KEY `ft_all` (`title`,`content`,`comment`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
 
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

@@ -1,7 +1,7 @@
 package com.mono.backend.config
 
-import com.mono.backend.cache.common.OptimizedCacheExecutor
-import com.mono.backend.cache.initCacheExecutor
+import com.mono.backend.infra.cache.common.OptimizedCacheExecutor
+import com.mono.backend.port.infra.common.cache.initCacheExecutor
 import jakarta.annotation.PostConstruct
 import org.springframework.context.annotation.Configuration
 

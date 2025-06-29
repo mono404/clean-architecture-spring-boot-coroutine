@@ -1,9 +1,10 @@
 package com.mono.backend.s3client.uploader
 
-import com.mono.backend.s3client.config.UploadConfig
-import com.mono.backend.s3client.model.ProgressCallback
-import com.mono.backend.s3client.storage.InMemoryStorageProvider
-import com.mono.backend.s3client.util.AwsSdkUtils
+import com.mono.backend.infra.s3Client.config.UploadConfig
+import com.mono.backend.infra.s3Client.model.ProgressCallback
+import com.mono.backend.infra.s3Client.storage.InMemoryStorageProvider
+import com.mono.backend.infra.s3Client.uploader.S3Uploader
+import com.mono.backend.infra.s3Client.util.AwsSdkUtils
 import io.mockk.clearAllMocks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.future.await

@@ -17,5 +17,10 @@ dependencies {
 
     // Firebase Admin SDK
     implementation("com.google.firebase:firebase-admin:9.5.0")
-//    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+    // kotlinx
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+    // Jackson
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 }

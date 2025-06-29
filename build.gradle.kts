@@ -2,6 +2,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
 }
 
 group = "com.mono"
@@ -21,6 +23,8 @@ subprojects {
     group = "com.mono.backend"
 
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.springframework.boot")
+    apply(plugin = "io.spring.dependency-management")
 
     repositories {
         mavenCentral()
