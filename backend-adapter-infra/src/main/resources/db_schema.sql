@@ -8,7 +8,7 @@
 #
 # Host: 10.251.63.114 (MySQL 9.2.0)
 # Database: backend
-# Generation Time: 2025-06-27 10:21:39 +0000
+# Generation Time: 2025-06-30 07:27:03 +0000
 # ************************************************************
 
 
@@ -55,7 +55,7 @@ CREATE TABLE `comment`
     `created_at`        datetime                                                       NOT NULL,
     `updated_at`        datetime                                                       NOT NULL,
     PRIMARY KEY (`comment_id`),
-    KEY                 `idx_article_id_parent_comment_id_comment_id` (`post_id`,`parent_comment_id`,`comment_id`)
+    KEY                 `idx_post_id_parent_comment_id_comment_id` (`post_id`,`parent_comment_id`,`comment_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
@@ -77,7 +77,7 @@ CREATE TABLE `comment_v2`
     `created_at` datetime                                              NOT NULL,
     `updated_at` datetime                                              NOT NULL,
     PRIMARY KEY (`comment_id`),
-    UNIQUE KEY `idx_article_id_path` (`post_id`,`path`)
+    UNIQUE KEY `idx_post_id_path` (`post_id`,`path`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
@@ -198,7 +198,7 @@ CREATE TABLE `post`
     `created_at` datetime                                                       NOT NULL,
     `updated_at` datetime                                                       NOT NULL,
     PRIMARY KEY (`post_id`),
-    KEY          `idx_board_id_article_id` (`board_id`,`post_id` DESC)
+    KEY          `idx_board_id_post_id` (`board_id`,`post_id` DESC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
@@ -231,7 +231,7 @@ CREATE TABLE `post_like`
     `member_id`    bigint   NOT NULL,
     `created_at`   datetime NOT NULL,
     PRIMARY KEY (`post_like_id`),
-    UNIQUE KEY `idx_article_id_user_id` (`post_id`,`member_id`)
+    UNIQUE KEY `idx_post_id_user_id` (`post_id`,`member_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 

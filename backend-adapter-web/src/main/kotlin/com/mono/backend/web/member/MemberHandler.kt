@@ -4,18 +4,20 @@ import com.mono.backend.common.log.logger
 import com.mono.backend.port.web.member.MemberUseCase
 import com.mono.backend.port.web.member.dto.UpdateProfileRequest
 import com.mono.backend.web.common.DefaultHandler
+import com.mono.backend.web.common.RequestAttributeUtils.getMemberId
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.awaitBodyOrNull
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import kotlin.jvm.optionals.getOrNull
+import org.springframework.web.reactive.function.server.*
 
 @Component
 class MemberHandler(
     private val memberUseCase: MemberUseCase,
 ) : DefaultHandler {
     val log = logger()
+
+    suspend fun getMyProfile(serverRequest: ServerRequest): ServerResponse {
+        val memberId = serverRequest.getMemberId()
+        return ok(memberUseCase.getMember(memberId))
+    }
 
     suspend fun patchMyProfile(serverRequest: ServerRequest): ServerResponse {
         val memberId = serverRequest.attribute("memberId").get() as Long
@@ -26,7 +28,7 @@ class MemberHandler(
     }
 
     suspend fun validateNickname(serverRequest: ServerRequest): ServerResponse {
-        val nickname = serverRequest.queryParam("nickname").getOrNull()
+        val nickname = serverRequest.queryParamOrNull("nickname")
             ?: return ServerResponse.badRequest().bodyValueAndAwait("nickname parameter is required")
 
         val isValid = memberUseCase.validateNickname(nickname)

@@ -12,6 +12,6 @@ interface EventHandler<T : EventPayload> {
 
     /** Full Text Search 용 테이블 업데이트 */
     suspend fun handleSearchIndex(event: Event<T>) = Unit
-    suspend fun supports(event: Event<T>): Boolean
-    suspend fun findPostId(event: Event<T>): Long?
+    fun supports(event: Event<T>): Boolean
+    fun findPostId(event: Event<T>): Long?
 }

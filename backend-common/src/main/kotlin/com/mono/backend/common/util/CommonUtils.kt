@@ -1,5 +1,7 @@
 package com.mono.backend.common.util
 
+import org.slf4j.Logger
+
 object CommonUtils {
     fun String.convertToBeanName(): String {
         val tokens = this.split("_", "-", " ")
@@ -24,5 +26,17 @@ object CommonUtils {
             this.apply(block)
         }
         return this
+    }
+
+    suspend inline fun <T> T.runCatchingAndLog(
+        log: Logger,
+        location: String,
+        crossinline block: suspend () -> T,
+    ): T? {
+        return runCatching {
+            block()
+        }.onFailure { throwable ->
+            log.error("[$location] Failed", throwable)
+        }.getOrNull()
     }
 }

@@ -23,4 +23,8 @@ class PostCommentCountPersistenceAdapter(
     override suspend fun decrease(postId: Long): Int {
         return postCommentCountRepository.decrease(postId)
     }
+
+    override suspend fun findByIds(postIds: List<Long>): List<PostCommentCount> {
+        return postCommentCountRepository.findAllByPostIdIn(postIds).map { it.toDomain() }
+    }
 }

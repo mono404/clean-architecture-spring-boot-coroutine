@@ -1,6 +1,7 @@
 package com.mono.backend.infra.cache.post.hot
 
 import com.mono.backend.port.infra.hotpost.cache.HotPostCommentCountCachePort
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate
 import org.springframework.stereotype.Repository
@@ -16,11 +17,11 @@ class HotPostCommentCountCacheAdapter(
     }
 
     override suspend fun createOrUpdate(postId: Long?, commentCount: Long?, ttl: Duration) {
-        redisTemplate.opsForValue().set(generateKey(postId), commentCount.toString(), ttl).awaitSingleOrNull()
+        redisTemplate.opsForValue().set(generateKey(postId), commentCount.toString(), ttl).awaitFirstOrNull()
     }
 
     override suspend fun delete(postId: Long) {
-        redisTemplate.delete(generateKey(postId)).awaitSingleOrNull()
+        redisTemplate.delete(generateKey(postId)).awaitFirstOrNull()
     }
 
     override suspend fun read(postId: Long?): Long {

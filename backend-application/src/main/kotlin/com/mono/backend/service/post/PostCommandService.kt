@@ -1,25 +1,21 @@
 package com.mono.backend.service.post
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.mono.backend.common.snowflake.Snowflake
-import com.mono.backend.common.util.PageLimitCalculator
-import com.mono.backend.domain.common.pagination.CursorRequest
-import com.mono.backend.domain.common.pagination.PageRequest
 import com.mono.backend.domain.event.EventType
 import com.mono.backend.domain.event.payload.PostCreatedEventPayload
 import com.mono.backend.domain.event.payload.PostDeletedEventPayload
 import com.mono.backend.domain.event.payload.PostUpdatedEventPayload
-import com.mono.backend.domain.post.board.BoardPostCount
+import com.mono.backend.domain.post.Post
 import com.mono.backend.domain.post.board.BoardType
 import com.mono.backend.port.infra.common.persistence.transaction
 import com.mono.backend.port.infra.post.event.PostEventDispatcherPort
 import com.mono.backend.port.infra.post.persistence.BoardPostCountPersistencePort
 import com.mono.backend.port.infra.post.persistence.PostPersistencePort
 import com.mono.backend.port.infra.s3client.S3UploadClientPort
+import com.mono.backend.port.web.exceptions.NotFoundException
+import com.mono.backend.port.web.member.MemberUseCase
 import com.mono.backend.port.web.post.PostCommandUseCase
 import com.mono.backend.port.web.post.dto.PostCreateRequest
-import com.mono.backend.port.web.post.dto.PostPageResponse
 import com.mono.backend.port.web.post.dto.PostResponse
 import com.mono.backend.port.web.post.dto.PostUpdateRequest
 import kotlinx.coroutines.async
@@ -28,6 +24,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
+import java.time.Instant
 
 @Service
 class PostCommandService(
@@ -35,35 +32,117 @@ class PostCommandService(
     private val boardPostCountPersistencePort: BoardPostCountPersistencePort,
     private val postEventDispatcherPort: PostEventDispatcherPort,
     private val s3UploadClientPort: S3UploadClientPort,
-    private val objectMapper: ObjectMapper
+    private val memberUseCase: MemberUseCase
 ) : PostCommandUseCase {
     override suspend fun create(
+        memberId: Long,
         request: PostCreateRequest,
         mediaFiles: List<FilePart>?
     ): PostResponse = coroutineScope {
-        transaction {
-            val blobIds = extractBlobIds(request.content)
-            val uploadedUrlMap = uploadFilesAsync(mediaFiles!!, blobIds)
-            val content = replaceBlobUrls(request.content, uploadedUrlMap)
+        // 트랜잭션 내에서 핵심 비즈니스 로직만 수행
+        val post = transaction {
+            val member = memberUseCase.getEmbeddedMember(memberId)
 
-            val postCreateRequest = request.copy(content = content)
-            val postDeferred = async { postPersistencePort.save(postCreateRequest.toDomain(Snowflake.nextId())) }
+            // 도메인 팩토리로 생성
+            val newPost = Post.create(
+                postId = Snowflake.nextId(),
+                title = request.title,
+                content = request.content,
+                boardType = request.boardType,
+                member = member
+            )
 
+            // 이미지가 있으면 처리
+            val finalPost = if (newPost.containsImages() && !mediaFiles.isNullOrEmpty()) {
+                val blobIds = newPost.extractImageBlobIds()
+                val uploadedUrlMap = uploadFilesAsync(mediaFiles, blobIds)
+                newPost.replaceImageUrls(uploadedUrlMap)
+            } else {
+                newPost
+            }
+
+            postPersistencePort.save(finalPost)
+        }
+
+        // 보드 카운트 증가 (별도 트랜잭션)
+        launch {
+            runCatching {
+                transaction { boardPostCountPersistencePort.upsertIncrease(request.boardType) }
+            }
+        }
+
+        // 이벤트 발행 (fire-and-forget)
+        launch {
+            runCatching {
+                postEventDispatcherPort.dispatch(
+                    type = EventType.POST_CREATED,
+                    payload = PostCreatedEventPayload.from(post, count(post.boardType))
+                )
+            }
+        }
+
+        PostResponse.from(post)
+    }
+
+    override suspend fun update(postId: Long, request: PostUpdateRequest): PostResponse = coroutineScope {
+        // 트랜잭션 내에서 핵심 업데이트만 수행
+        val updatedPost = transaction {
+            val post = postPersistencePort.findById(postId) ?: throw NotFoundException("Post not found")
+
+//             TODO 권한 검사는 웹 계층에서 memberId를 받아서 처리해야 함
+//             현재는 memberId 파라미터가 없으므로 임시로 주석 처리
+//             require(post.canBeEditedBy(memberId)) { "게시글 수정 권한이 없습니다." }
+
+            // 도메인 비즈니스 로직으로 업데이트
+            val updated = post.update(request.title, request.content)
+            postPersistencePort.save(updated)
+            updated
+        }
+
+        // 이벤트 발행 (fire-and-forget)
+        launch {
+            runCatching {
+                postEventDispatcherPort.dispatch(
+                    type = EventType.POST_UPDATED,
+                    payload = PostUpdatedEventPayload.from(updatedPost)
+                )
+            }
+        }
+
+        PostResponse.from(updatedPost)
+    }
+
+    override suspend fun delete(postId: Long): Unit = coroutineScope {
+        // 트랜잭션 내에서 삭제만 수행
+        val deletedPost = transaction {
+            postPersistencePort.findById(postId)?.also { post ->
+                // 권한 검사는 웹 계층에서 memberId를 받아서 처리해야 함
+                // require(post.canBeDeletedBy(memberId)) { "게시글 삭제 권한이 없습니다." }
+                postPersistencePort.delete(post)
+            }
+        }
+
+        deletedPost?.let { post ->
+            // 보드 카운트 감소 (별도 트랜잭션)
             launch {
-                boardPostCountPersistencePort.increase(request.boardType).takeIf { it == 0 }?.let {
-                    boardPostCountPersistencePort.save(BoardPostCount(request.boardType, 1L))
+                runCatching {
+                    transaction { boardPostCountPersistencePort.decrease(post.boardType) }
                 }
             }
 
-            val post = postDeferred.await()
-
-            postEventDispatcherPort.dispatch(
-                type = EventType.POST_CREATED,
-                payload = PostCreatedEventPayload.from(post, count(post.boardType))
-            )
-            PostResponse.from(post)
+            // 이벤트 발행 (fire-and-forget)
+            launch {
+                runCatching {
+                    postEventDispatcherPort.dispatch(
+                        type = EventType.POST_DELETED,
+                        payload = PostDeletedEventPayload.from(post, count(post.boardType))
+                    )
+                }
+            }
         }
     }
+
+    suspend fun count(boardType: BoardType): Long = boardPostCountPersistencePort.findById(boardType)?.postCount ?: 0
 
     private suspend fun uploadFilesAsync(
         mediaFiles: List<FilePart>,
@@ -74,110 +153,11 @@ class PostCommandService(
         return coroutineScope {
             mediaFiles.mapIndexed { index, filePart ->
                 async {
-                    val fileResponse =
-                        s3UploadClientPort.upload(filePart.filename(), filePart) { uploaded, total ->
-                            println("Uploaded $uploaded/$total bytes")
-                        }
+                    val fileName = "post_image/upload_${Instant.now().toEpochMilli()}.png"
+                    val fileResponse = s3UploadClientPort.upload(fileName, filePart)
                     blobIds[index] to fileResponse.path
                 }
             }.awaitAll().toMap()
         }
-    }
-
-    override suspend fun update(postId: Long, request: PostUpdateRequest): PostResponse =
-        transaction {
-            val post = postPersistencePort.findById(postId) ?: throw RuntimeException("Post not found")
-            val updatedPost = post.copy(title = request.title, content = request.content)
-            postPersistencePort.save(updatedPost) // does not need in JPA
-
-            postEventDispatcherPort.dispatch(
-                type = EventType.POST_UPDATED,
-                payload = PostUpdatedEventPayload.from(post)
-            )
-
-            PostResponse.from(updatedPost)
-        }
-
-    suspend fun read(postId: Long) = postPersistencePort.findById(postId)?.let { PostResponse.from(it) }
-
-    override suspend fun delete(postId: Long) {
-        transaction {
-            postPersistencePort.findById(postId)?.let { post ->
-                coroutineScope {
-                    launch { postPersistencePort.delete(post) }
-                    launch { boardPostCountPersistencePort.decrease(post.boardType) }
-                }
-
-                postEventDispatcherPort.dispatch(
-                    type = EventType.POST_DELETED,
-                    payload = PostDeletedEventPayload.from(post, count(post.boardType))
-                )
-            }
-        }
-    }
-
-    suspend fun readAll(boardType: BoardType, pageRequest: PageRequest): PostPageResponse = coroutineScope {
-        val posts = async {
-            postPersistencePort.findAll(boardType, pageRequest).map(PostResponse::from)
-        }
-        val postCount = async {
-            postPersistencePort.count(boardType, PageLimitCalculator.calculatePageLimit(pageRequest, 10L))
-        }
-        PostPageResponse(
-            posts.await(),
-            postCount.await()
-        )
-    }
-
-    suspend fun readAllInfiniteScroll(boardType: BoardType, cursorRequest: CursorRequest): List<PostResponse> {
-        val posts = if (boardType == BoardType.ALL) {
-            postPersistencePort.findAllInfiniteScroll(cursorRequest.size)
-        } else {
-            if (cursorRequest.cursor == null)
-                postPersistencePort.findAllInfiniteScroll(boardType, cursorRequest.size)
-            else
-                postPersistencePort.findAllInfiniteScroll(boardType, cursorRequest.size, cursorRequest.cursor!!)
-        }
-
-        return posts.map(PostResponse::from)
-    }
-
-    override suspend fun count(boardType: BoardType): Long {
-        return boardPostCountPersistencePort.findById(boardType)?.postCount ?: 0
-    }
-
-    fun replaceBlobUrls(deltaJson: String, uploadedUrlMap: Map<String, String>): String {
-        val nodes = objectMapper.readTree(deltaJson)
-
-        for (node in nodes) {
-            val insertNode = node["insert"]
-            listOf("image", "video").forEach { mediaType ->
-                if (insertNode?.has(mediaType) == true) {
-                    val url = insertNode[mediaType].asText()
-                    val uploadedUrl = uploadedUrlMap[url]
-                    if (uploadedUrl != null) {
-                        (insertNode as ObjectNode).put(mediaType, uploadedUrl)
-                    }
-                }
-            }
-        }
-        return objectMapper.writeValueAsString(nodes)
-    }
-
-    fun extractBlobIds(deltaJson: String): List<String> {
-        val nodes = objectMapper.readTree(deltaJson)
-
-        val ids = mutableListOf<String>()
-
-        for (node in nodes) {
-            val insertNode = node["insert"]
-            listOf("image", "video").forEach { mediaType ->
-                if (insertNode?.has(mediaType) == true) {
-                    val url = insertNode[mediaType].asText()
-                    ids.add(url)
-                }
-            }
-        }
-        return ids
     }
 }

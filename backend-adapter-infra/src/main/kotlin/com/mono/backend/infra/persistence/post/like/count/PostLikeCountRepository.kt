@@ -1,5 +1,6 @@
 package com.mono.backend.infra.persistence.post.like.count
 
+import com.mono.backend.domain.post.like.PostLikeCount
 import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -31,4 +32,16 @@ interface PostLikeCountRepository : CoroutineCrudRepository<PostLikeCountEntity,
         """
     )
     suspend fun decrease(postId: Long): Int
+
+    suspend fun findAllByPostIdIn(postId: List<Long>): List<PostLikeCountEntity>
+
+    @Modifying
+    @Query(
+        value = """
+            UPDATE post_like_count
+            SET count = :count, version = :newVersion
+            WHERE post_id = :postId AND version = :previousVersion
+        """
+    )
+    suspend fun saveWithVersionCheck(postLikeCount: PostLikeCount, previousVersion: Long): Int
 }

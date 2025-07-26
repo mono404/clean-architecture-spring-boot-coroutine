@@ -1,5 +1,6 @@
 package com.mono.backend.domain.search
 
+import com.mono.backend.domain.common.member.EmbeddedMember
 import com.mono.backend.domain.post.board.BoardType
 import java.time.LocalDateTime
 
@@ -12,6 +13,9 @@ data class SearchIndex(
     val comment: String? = null,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null,
+
+    // member 의 반정규화 필드
+    val member: EmbeddedMember,
 ) {
     fun appendComment(newComment: String): SearchIndex {
         val combined = (this.comment.orEmpty() + " " + newComment).trim()

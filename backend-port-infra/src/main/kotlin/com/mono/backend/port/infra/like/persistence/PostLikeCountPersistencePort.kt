@@ -8,4 +8,6 @@ interface PostLikeCountPersistencePort {
     suspend fun findLockedByPostId(postId: Long): PostLikeCount?
     suspend fun increase(postId: Long): Int
     suspend fun decrease(postId: Long): Int
+    suspend fun findByIds(postIds: List<Long>): List<PostLikeCount>
+    suspend fun saveWithVersionCheck(postLikeCount: PostLikeCount, previousVersion: Long): Boolean
 }

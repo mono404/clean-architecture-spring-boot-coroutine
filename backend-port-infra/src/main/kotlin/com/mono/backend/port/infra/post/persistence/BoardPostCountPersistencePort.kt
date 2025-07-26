@@ -8,4 +8,5 @@ interface BoardPostCountPersistencePort {
     suspend fun findById(boardType: BoardType): BoardPostCount?
     suspend fun increase(boardType: BoardType): Int
     suspend fun decrease(boardType: BoardType): Int
+    suspend fun upsertIncrease(boardType: BoardType): Int
 }

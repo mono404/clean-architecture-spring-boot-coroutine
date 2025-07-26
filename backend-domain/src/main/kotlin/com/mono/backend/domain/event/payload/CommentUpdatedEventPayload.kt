@@ -9,22 +9,32 @@ class CommentUpdatedEventPayload(
     val content: String = "",
     val path: String = "",
     val postId: Long = 0,
-    val writerId: Long = 0,
     val deleted: Boolean = false,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now(),
-    val postCommentCount: Long = 0
+
+    // post comment count 반 정규화
+    val postCommentCount: Long = 0,
+
+    // member 반 정규화
+    val memberId: Long = 0,
+    val nickname: String = "",
+    val profileImageUrl: String? = null,
 ) : EventPayload {
     companion object {
         fun from(commentV2: CommentV2, count: Long) = CommentUpdatedEventPayload(
             commentId = commentV2.commentId,
             content = commentV2.content,
             postId = commentV2.postId,
-            writerId = commentV2.writerId,
             deleted = commentV2.deleted,
             createdAt = commentV2.createdAt!!,
             updatedAt = commentV2.updatedAt!!,
-            postCommentCount = count
+
+            postCommentCount = count,
+
+            memberId = commentV2.member.memberId,
+            nickname = commentV2.member.nickname,
+            profileImageUrl = commentV2.member.profileImageUrl,
         )
     }
 }

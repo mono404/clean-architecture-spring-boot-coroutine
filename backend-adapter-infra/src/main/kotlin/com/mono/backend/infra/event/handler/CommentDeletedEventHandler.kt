@@ -58,11 +58,11 @@ class CommentDeletedEventHandler(
         }
     }
 
-    override suspend fun supports(event: Event<CommentDeletedEventPayload>): Boolean {
-        return EventType.COMMENT_DELETED == event.type
+    override fun supports(event: Event<CommentDeletedEventPayload>): Boolean {
+        return EventType.POST_COMMENT_DELETED == event.type
     }
 
-    override suspend fun findPostId(event: Event<CommentDeletedEventPayload>): Long? {
+    override fun findPostId(event: Event<CommentDeletedEventPayload>): Long? {
         return event.payload?.postId
     }
 }

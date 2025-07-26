@@ -27,4 +27,13 @@ class PostLikeCountPersistenceAdapter(
     override suspend fun decrease(postId: Long): Int {
         return postLikeCountRepository.decrease(postId)
     }
+
+    override suspend fun findByIds(postIds: List<Long>): List<PostLikeCount> {
+        return postLikeCountRepository.findAllByPostIdIn(postIds).map { it.toDomain() }
+    }
+
+    override suspend fun saveWithVersionCheck(postLikeCount: PostLikeCount, previousVersion: Long): Boolean {
+        val rowUpdated = postLikeCountRepository.saveWithVersionCheck(postLikeCount, previousVersion)
+        return rowUpdated == 1
+    }
 }

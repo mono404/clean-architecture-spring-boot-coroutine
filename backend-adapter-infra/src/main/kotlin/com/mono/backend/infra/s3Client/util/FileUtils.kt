@@ -36,7 +36,7 @@ object FileUtils {
         val totalSize = sumOf { it.size }
         val combined = ByteArray(totalSize)
         var pos = 0
-        for(b in this) {
+        for (b in this) {
             b.copyInto(combined, pos)
             pos += b.size
         }
@@ -47,12 +47,12 @@ object FileUtils {
         val buffer = mutableListOf<T>()
         collect { value ->
             buffer.add(value)
-            if(buffer.size == size) {
+            if (buffer.size == size) {
                 emit(buffer.toList())
                 buffer.clear()
             }
         }
-        if(buffer.isNotEmpty()) {
+        if (buffer.isNotEmpty()) {
             emit(buffer.toList())
         }
     }

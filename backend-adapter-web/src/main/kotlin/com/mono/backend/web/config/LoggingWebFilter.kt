@@ -12,10 +12,7 @@ class LoggingWebFilter : WebFilter {
     private val log = logger()
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         return chain.filter(exchange)
-            .doOnSubscribe { log.info("Request received: ${exchange.request.uri}") }
-            .doOnError {
-                log.error("Request failed: ${exchange.request.uri}")
-                log.error(it.message, it)
-            }
+            .doOnSubscribe { log.info("Request received: ${exchange.request.method} \"${exchange.request.path}\"") }
+            .doOnError { log.error("Request failed: ${exchange.request.uri}", it) }
     }
 }

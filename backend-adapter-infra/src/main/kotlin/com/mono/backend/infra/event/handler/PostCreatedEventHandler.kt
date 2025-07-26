@@ -6,13 +6,15 @@ import com.mono.backend.domain.event.Event
 import com.mono.backend.domain.event.EventType
 import com.mono.backend.domain.event.payload.PostCreatedEventPayload
 import com.mono.backend.domain.post.PostQueryModel
+import com.mono.backend.domain.post.board.BoardType
 import com.mono.backend.port.infra.hotpost.cache.HotPostCreatedTimeCachePort
 import com.mono.backend.port.infra.post.cache.BoardPostCountCachePort
 import com.mono.backend.port.infra.post.cache.PostIdListCachePort
 import com.mono.backend.port.infra.post.cache.PostQueryModelCachePort
 import com.mono.backend.port.infra.search.persistence.SearchPersistencePort
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import org.springframework.stereotype.Component
-import java.time.Duration
 
 @Component
 class PostCreatedEventHandler(
@@ -35,14 +37,14 @@ class PostCreatedEventHandler(
         }
     }
 
-    override suspend fun handlePostRead(event: Event<PostCreatedEventPayload>) {
+    override suspend fun handlePostRead(event: Event<PostCreatedEventPayload>): Unit = coroutineScope {
         event.payload?.let { payload ->
-            postQueryModelCachePort.create(
-                PostQueryModel.create(payload),
-                Duration.ofDays(1)
-            )
-            postIdListCachePort.add(payload.boardType, payload.postId, 1000L)
-            boardPostCountCachePort.createOrUpdate(payload.boardType, payload.boardPostCount)
+            launch { postQueryModelCachePort.create(PostQueryModel.create(payload)) }
+            launch {
+                postIdListCachePort.save(payload.boardType, payload.postId)
+                postIdListCachePort.save(BoardType.ALL, payload.postId)
+            }
+            launch { boardPostCountCachePort.createOrUpdate(payload.boardType, payload.boardPostCount) }
         }
     }
 
@@ -57,11 +59,11 @@ class PostCreatedEventHandler(
         }
     }
 
-    override suspend fun supports(event: Event<PostCreatedEventPayload>): Boolean {
+    override fun supports(event: Event<PostCreatedEventPayload>): Boolean {
         return EventType.POST_CREATED == event.type
     }
 
-    override suspend fun findPostId(event: Event<PostCreatedEventPayload>): Long? {
+    override fun findPostId(event: Event<PostCreatedEventPayload>): Long? {
         return event.payload?.postId
     }
 }

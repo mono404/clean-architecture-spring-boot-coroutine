@@ -11,3 +11,7 @@ class ForbiddenException(
 class BadRequestException(
     override val message: String = "Bad Request"
 ) : RuntimeException(message)
+
+class NotFoundException(
+    override val message: String = "Not Found"
+) : RuntimeException(message)

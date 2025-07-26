@@ -13,7 +13,7 @@ class PostViewDistributedLockCacheAdapter(
     companion object {
 
         // view::post::{postId}::member::{memberId}::lock
-        const val KET_FORMAT = "view::post::{postId}::member::{memberId}::lock"
+        const val KET_FORMAT = "view::post::%s::member::%s::lock"
     }
 
     override suspend fun lock(postId: Long, memberId: Long, ttl: Duration): Boolean? {

@@ -7,4 +7,5 @@ interface PostCommentCountPersistencePort {
     suspend fun findById(postId: Long): PostCommentCount?
     suspend fun increase(postId: Long): Int
     suspend fun decrease(postId: Long): Int
+    suspend fun findByIds(postIds: List<Long>): List<PostCommentCount>
 }

@@ -7,10 +7,10 @@ interface SearchIndexRepository : CoroutineCrudRepository<SearchIndexEntity, Lon
     @Query(
         """
         SELECT * FROM search_index
-        WHERE MATCH(title, content, comment) AGAINST (:keyword IN BOOLEAN MODE)
-        AND searchIndexId < :lastSearchIndexId
-        ORDER BY searchIndexId DESC;
-        LIMIT :limit;
+        WHERE MATCH(title, content, comment) AGAINST (CONCAT(:keyword, '*') IN BOOLEAN MODE)
+        AND search_index_id < :lastSearchIndexId
+        ORDER BY search_index_id DESC
+        LIMIT :limit
     """
     )
     suspend fun searchByLatest(keyword: String, lastSearchIndexId: Long, limit: Int): List<SearchIndexEntity>
@@ -19,9 +19,9 @@ interface SearchIndexRepository : CoroutineCrudRepository<SearchIndexEntity, Lon
         """
         SELECT *, MATCH(title, content, comment) AGAINST (:keyword IN BOOLEAN MODE) AS score
         FROM search_index
-        WHERE MATCH(title, content, comment) AGAINST (:keyword IN BOOLEAN MODE)
+        WHERE MATCH(title, content, comment) AGAINST (CONCAT(:keyword, '*') IN BOOLEAN MODE)
         ORDER BY score DESC
-        LIMIT :limit OFFSET :offset;
+        LIMIT :limit OFFSET :offset
     """
     )
     suspend fun searchByRelevance(keyword: String, offset: Int, limit: Int): List<SearchIndexEntity>

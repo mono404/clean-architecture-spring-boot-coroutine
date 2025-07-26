@@ -2,7 +2,7 @@ package com.mono.backend.infra.cache.post.hot
 
 import com.mono.backend.common.log.logger
 import com.mono.backend.port.infra.hotpost.cache.HotPostListCachePort
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.domain.Range
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate
@@ -39,7 +39,7 @@ class HotPostListCacheAdapter(
                 ),
                 connection.keyCommands().expire(bbKey, ttl)
             )
-        }.awaitSingle()
+        }.awaitFirstOrNull()
     }
 
     override suspend fun remove(postId: Long, time: LocalDateTime) {

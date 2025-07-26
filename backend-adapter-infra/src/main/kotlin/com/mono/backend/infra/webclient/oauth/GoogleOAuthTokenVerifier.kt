@@ -14,7 +14,7 @@ import reactor.util.retry.Retry
 @DependsOn("webClientFactory")
 class GoogleOAuthTokenVerifier(
     @Qualifier("googleOAuthWebClientPair") webClientPair: WebClientPair,
-): OAuthTokenVerifier {
+) : OAuthTokenVerifier {
 
     private val webClient = webClientPair.webClient
     private val retrySpec = Retry.backoff(

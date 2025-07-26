@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 @Repository
 class PostViewCountCacheAdapter(
     private val redisTemplate: ReactiveStringRedisTemplate,
-): PostViewCountCachePort {
+) : PostViewCountCachePort {
     companion object {
         // view::post::{postId}::view_count
         const val KET_FORMAT = "view::post::%s::view_count"

@@ -50,11 +50,11 @@ class PostDeletedEventHandler(
         }
     }
 
-    override suspend fun supports(event: Event<PostDeletedEventPayload>): Boolean {
+    override fun supports(event: Event<PostDeletedEventPayload>): Boolean {
         return EventType.POST_DELETED == event.type
     }
 
-    override suspend fun findPostId(event: Event<PostDeletedEventPayload>): Long? {
+    override fun findPostId(event: Event<PostDeletedEventPayload>): Long? {
         return event.payload?.postId
     }
 }

@@ -10,6 +10,7 @@ class MemberRouter(
 ) {
     @Bean
     fun memberRoutes(): CoRouterFunctionDsl.() -> Unit = {
+        GET("/me", memberHandler::getMyProfile)
         PATCH("/me", memberHandler::patchMyProfile)
         GET("/validate-nickname", memberHandler::validateNickname)
     }

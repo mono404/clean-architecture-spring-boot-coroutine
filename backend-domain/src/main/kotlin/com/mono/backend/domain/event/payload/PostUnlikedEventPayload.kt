@@ -11,7 +11,7 @@ data class PostUnlikedEventPayload(
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now(),
     val postLikeCount: Long = 0
-): EventPayload {
+) : EventPayload {
     companion object {
         fun from(postLike: PostLike, count: Long) = PostUnlikedEventPayload(
             postLikeId = postLike.postLikeId,

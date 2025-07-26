@@ -1,5 +1,7 @@
 package com.mono.backend.infra.persistence.post.comment
 
+import com.mono.backend.domain.common.pagination.CursorRequest
+import com.mono.backend.domain.common.pagination.PageRequest
 import com.mono.backend.domain.post.comment.CommentV2
 import com.mono.backend.port.infra.comment.persistence.CommentPersistencePortV2
 import org.springframework.stereotype.Repository
@@ -36,7 +38,9 @@ class CommentPersistenceAdapterV2(
         )
     }
 
-    override suspend fun findAll(postId: Long, offset: Long, limit: Long): List<CommentV2> {
+    override suspend fun findAll(postId: Long, pageRequest: PageRequest): List<CommentV2> {
+        val offset = pageRequest.page * pageRequest.size
+        val limit = pageRequest.size
         return commentRepositoryV2.findAll(postId, offset, limit).map(CommentV2Entity::toDomain)
     }
 
@@ -44,12 +48,12 @@ class CommentPersistenceAdapterV2(
         return commentRepositoryV2.count(postId, limit)
     }
 
-    override suspend fun findAllInfiniteScroll(postId: Long, limit: Long): List<CommentV2> {
-        return commentRepositoryV2.findAllInfiniteScroll(postId, limit).map(CommentV2Entity::toDomain)
-    }
-
-    override suspend fun findAllInfiniteScroll(postId: Long, lastPath: String, limit: Long): List<CommentV2> {
-        return commentRepositoryV2.findAllInfiniteScroll(postId, lastPath, limit).map(CommentV2Entity::toDomain)
+    override suspend fun findAllInfiniteScroll(postId: Long, cursorRequest: CursorRequest): List<CommentV2> {
+        return if (cursorRequest.cursor == null)
+            commentRepositoryV2.findAllInfiniteScroll(postId, cursorRequest.size).map(CommentV2Entity::toDomain)
+        else
+            commentRepositoryV2.findAllInfiniteScroll(postId, cursorRequest.size, cursorRequest.cursor!!)
+                .map(CommentV2Entity::toDomain)
     }
 
     override suspend fun findAllByPostId(postId: Long): List<CommentV2> {

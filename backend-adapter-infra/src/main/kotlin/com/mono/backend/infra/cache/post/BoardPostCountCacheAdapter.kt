@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 @Repository
 class BoardPostCountCacheAdapter(
     private val redisTemplate: ReactiveStringRedisTemplate,
-): BoardPostCountCachePort {
+) : BoardPostCountCachePort {
     companion object {
         const val KET_FORMAT = "post-read::board-post-count::board::%s"
     }

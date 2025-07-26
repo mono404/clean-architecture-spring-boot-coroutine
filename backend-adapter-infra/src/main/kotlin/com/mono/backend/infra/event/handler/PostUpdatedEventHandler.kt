@@ -36,11 +36,11 @@ class PostUpdatedEventHandler(
         }
     }
 
-    override suspend fun supports(event: Event<PostUpdatedEventPayload>): Boolean {
+    override fun supports(event: Event<PostUpdatedEventPayload>): Boolean {
         return EventType.POST_UPDATED == event.type
     }
 
-    override suspend fun findPostId(event: Event<PostUpdatedEventPayload>): Long? {
+    override fun findPostId(event: Event<PostUpdatedEventPayload>): Long? {
         return event.payload?.postId
     }
 }

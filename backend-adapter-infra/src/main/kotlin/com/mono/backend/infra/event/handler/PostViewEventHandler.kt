@@ -21,11 +21,11 @@ class PostViewEventHandler(
         }
     }
 
-    override suspend fun supports(event: Event<PostViewedEventPayload>): Boolean {
+    override fun supports(event: Event<PostViewedEventPayload>): Boolean {
         return EventType.POST_VIEWED == event.type
     }
 
-    override suspend fun findPostId(event: Event<PostViewedEventPayload>): Long? {
+    override fun findPostId(event: Event<PostViewedEventPayload>): Long? {
         return event.payload?.postId
     }
 }

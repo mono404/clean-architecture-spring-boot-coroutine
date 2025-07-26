@@ -1,5 +1,6 @@
 package com.mono.backend.infra.persistence.post.comment
 
+import com.mono.backend.domain.common.member.EmbeddedMember
 import com.mono.backend.domain.post.comment.CommentPath
 import com.mono.backend.domain.post.comment.CommentV2
 import org.springframework.data.annotation.CreatedDate
@@ -16,7 +17,6 @@ data class CommentV2Entity(
     val commentId: Long,
     val content: String,
     val postId: Long,
-    val writerId: Long,
     @Column("path")
     val commentPath: String,
     var deleted: Boolean = false,
@@ -24,6 +24,11 @@ data class CommentV2Entity(
     var createdAt: LocalDateTime? = null,
     @LastModifiedDate
     var updatedAt: LocalDateTime? = null,
+
+    // member 의 반정규화 필드
+    val memberId: Long,
+    val nickname: String,
+    val profileImageUrl: String?,
 ) : Persistable<Long> {
     override fun getId(): Long = commentId
     override fun isNew(): Boolean = createdAt == null
@@ -32,11 +37,16 @@ data class CommentV2Entity(
             commentId = commentId,
             content = content,
             postId = postId,
-            writerId = writerId,
             commentPath = CommentPath(commentPath),
             deleted = deleted,
             createdAt = createdAt,
-            updatedAt = updatedAt
+            updatedAt = updatedAt,
+
+            member = EmbeddedMember(
+                memberId = memberId,
+                nickname = nickname,
+                profileImageUrl = profileImageUrl
+            ),
         )
     }
 
@@ -46,11 +56,13 @@ data class CommentV2Entity(
                 commentId = commentV2.commentId,
                 content = commentV2.content,
                 postId = commentV2.postId,
-                writerId = commentV2.writerId,
                 commentPath = commentV2.commentPath.path,
                 deleted = commentV2.deleted,
                 createdAt = commentV2.createdAt,
-                updatedAt = commentV2.updatedAt
+
+                memberId = commentV2.member.memberId,
+                nickname = commentV2.member.nickname,
+                profileImageUrl = commentV2.member.profileImageUrl
             )
         }
     }

@@ -10,6 +10,6 @@ class HotPostRouter(
 ) {
     @Bean
     fun hotPostRoutes(): CoRouterFunctionDsl.() -> Unit = {
-        GET("/posts/date/{dateStr}", hotPostHandler::readAll)
+        GET("", hotPostHandler::readAll)
     }
 }

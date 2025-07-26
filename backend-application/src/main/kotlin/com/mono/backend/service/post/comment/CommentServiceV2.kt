@@ -1,7 +1,9 @@
-package com.mono.backend.service.comment
+package com.mono.backend.service.post.comment
 
 import com.mono.backend.common.snowflake.Snowflake
 import com.mono.backend.common.util.PageLimitCalculator
+import com.mono.backend.domain.common.pagination.CursorRequest
+import com.mono.backend.domain.common.pagination.PageRequest
 import com.mono.backend.domain.event.EventType
 import com.mono.backend.domain.event.payload.CommentCreatedEventPayload
 import com.mono.backend.domain.event.payload.CommentDeletedEventPayload
@@ -12,6 +14,7 @@ import com.mono.backend.port.infra.comment.persistence.CommentPersistencePortV2
 import com.mono.backend.port.infra.comment.persistence.PostCommentCountPersistencePort
 import com.mono.backend.port.infra.common.persistence.transaction
 import com.mono.backend.port.infra.post.event.PostEventDispatcherPort
+import com.mono.backend.port.web.member.MemberUseCase
 import com.mono.backend.port.web.post.comment.CommentV2UseCase
 import com.mono.backend.port.web.post.comment.dto.CommentCreateRequestV2
 import com.mono.backend.port.web.post.comment.dto.CommentPageResponseV2
@@ -26,39 +29,45 @@ import org.springframework.stereotype.Service
 class CommentServiceV2(
     private val commentPersistencePortV2: CommentPersistencePortV2,
     private val postCommentCountPersistencePort: PostCommentCountPersistencePort,
-    private val postEventDispatcherPort: PostEventDispatcherPort
+    private val postEventDispatcherPort: PostEventDispatcherPort,
+    private val memberUseCase: MemberUseCase,
 ) : CommentV2UseCase {
-    override suspend fun create(request: CommentCreateRequestV2): CommentResponseV2 = coroutineScope {
-        transaction {
-            val parent = findParent(request)
-            val parentCommentPath = parent?.commentPath ?: CommentPath("")
-            val descendantsTopPath =
-                commentPersistencePortV2.findDescendantsTopPath(request.postId, parentCommentPath.path)
-            val commentDeferred = async {
-                commentPersistencePortV2.save(
-                    request.toDomain(
-                        commentId = Snowflake.nextId(),
-                        parentCommentPath = parentCommentPath,
-                        descendantsTopPath = descendantsTopPath
-                    )
-                )
-            }
-
-            launch {
-                postCommentCountPersistencePort.increase(request.postId).takeIf { it == 0 }?.let {
-                    postCommentCountPersistencePort.save(PostCommentCount(request.postId, 1L))
+    override suspend fun create(memberId: Long, postId: Long, request: CommentCreateRequestV2): CommentResponseV2 =
+        coroutineScope {
+            transaction {
+                launch {
+                    postCommentCountPersistencePort.increase(postId).takeIf { it == 0 }?.let {
+                        postCommentCountPersistencePort.save(PostCommentCount(postId, 1L))
+                    }
                 }
+
+                val comment = transaction {
+                    val member = memberUseCase.getEmbeddedMember(memberId)
+                    val parentCommentPath =
+                        request.parentPath?.let { commentPersistencePortV2.findByPath(it)?.commentPath }
+                            ?: CommentPath()
+                    val descendantsTopPath =
+                        commentPersistencePortV2.findDescendantsTopPath(postId, parentCommentPath.path)
+
+                    commentPersistencePortV2.save(
+                        CommentV2.create(
+                            commentId = Snowflake.nextId(),
+                            content = request.content,
+                            postId = postId,
+                            commentPath = parentCommentPath.createChildCommentPath(descendantsTopPath),
+                            member = member
+                        )
+                    )
+                }
+
+                postEventDispatcherPort.dispatch(
+                    type = EventType.POST_COMMENT_CREATED,
+                    payload = CommentCreatedEventPayload.from(comment, count(comment.postId)),
+                )
+
+                CommentResponseV2.from(comment)
             }
-
-            val comment = commentDeferred.await()
-            postEventDispatcherPort.dispatch(
-                type = EventType.COMMENT_CREATED,
-                payload = CommentCreatedEventPayload.from(comment, count(comment.postId)),
-            )
-
-            CommentResponseV2.from(comment)
         }
-    }
 
     private suspend fun findParent(request: CommentCreateRequestV2): CommentV2? {
         return request.parentPath?.let { path ->
@@ -92,7 +101,7 @@ class CommentServiceV2(
                     }
 
                     postEventDispatcherPort.dispatch(
-                        type = EventType.COMMENT_DELETED,
+                        type = EventType.POST_COMMENT_DELETED,
                         payload = CommentDeletedEventPayload.from(comment, count(comment.postId)),
                     )
                 }
@@ -115,13 +124,13 @@ class CommentServiceV2(
         }
     }
 
-    override suspend fun readAll(postId: Long, page: Long, pageSize: Long): CommentPageResponseV2 = coroutineScope {
+    override suspend fun readAll(postId: Long, pageRequest: PageRequest): CommentPageResponseV2 = coroutineScope {
         val comments = async {
-            commentPersistencePortV2.findAll(postId, (page - 1) * pageSize, pageSize)
+            commentPersistencePortV2.findAll(postId, pageRequest)
                 .map { CommentResponseV2.from(it) }
         }
         val commentCount = async {
-            commentPersistencePortV2.count(postId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L))
+            commentPersistencePortV2.count(postId, PageLimitCalculator.calculatePageLimit(pageRequest, 10L))
         }
         CommentPageResponseV2(
             comments.await(),
@@ -131,19 +140,16 @@ class CommentServiceV2(
 
     override suspend fun readAllInfiniteScroll(
         postId: Long,
-        lastPath: String?,
-        pageSize: Long
+        cursorRequest: CursorRequest,
     ): List<CommentResponseV2> {
-        val comments = if (lastPath == null) {
-            commentPersistencePortV2.findAllInfiniteScroll(postId, pageSize)
-        } else {
-            commentPersistencePortV2.findAllInfiniteScroll(postId, lastPath, pageSize)
-        }
-
-        return comments.map { CommentResponseV2.from(it) }
+        return commentPersistencePortV2.findAllInfiniteScroll(postId, cursorRequest).map { CommentResponseV2.from(it) }
     }
 
     override suspend fun count(postId: Long): Long {
         return postCommentCountPersistencePort.findById(postId)?.commentCount ?: 0L
+    }
+
+    override suspend fun countAll(postIds: List<Long>): Map<Long, Long> {
+        return postCommentCountPersistencePort.findByIds(postIds).associate { it.postId to it.commentCount }
     }
 }

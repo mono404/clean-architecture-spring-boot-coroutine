@@ -16,7 +16,9 @@ object DataSerializer {
         return ObjectMapper()
             .registerModule(JavaTimeModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .registerModule(KotlinModule.Builder().build())  // cannot deserialize from Object value : 코틀린에서 기본 생성자 관련 에러 처리
+            .registerModule(
+                KotlinModule.Builder().build()
+            )  // cannot deserialize from Object value : 코틀린에서 기본 생성자 관련 에러 처리
     }
 
     fun <T> deserialize(data: String?, clazz: Class<T>): T? {

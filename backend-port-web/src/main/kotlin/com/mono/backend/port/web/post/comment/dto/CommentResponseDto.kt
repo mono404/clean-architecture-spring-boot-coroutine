@@ -15,52 +15,64 @@ data class CommentPageResponseV2(
 )
 
 data class CommentResponse(
-    val commentId: Long,
+    val commentId: String,
     val content: String,
-    val parentCommentId: Long,
-    val postId: Long,
-    val writerId: Long,
+    val parentCommentId: String,
+    val postId: String,
     var deleted: Boolean,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
+
+    val memberId: String,
+    val nickname: String,
+    val profileImageUrl: String?,
 ) {
     companion object {
         fun from(comment: Comment): CommentResponse {
             return CommentResponse(
-                commentId = comment.commentId,
+                commentId = comment.commentId.toString(),
                 content = comment.content,
-                parentCommentId = comment.parentCommentId,
-                postId = comment.postId,
-                writerId = comment.writerId,
+                parentCommentId = comment.parentCommentId.toString(),
+                postId = comment.postId.toString(),
                 deleted = comment.deleted,
                 createdAt = comment.createdAt!!,
-                updatedAt = comment.updatedAt!!
+                updatedAt = comment.updatedAt!!,
+
+                memberId = comment.member.memberId.toString(),
+                nickname = comment.member.nickname,
+                profileImageUrl = comment.member.profileImageUrl,
             )
         }
     }
 }
 
 data class CommentResponseV2(
-    val commentId: Long,
+    val commentId: String,
     val content: String,
-    val postId: Long,
-    val writerId: Long,
+    val postId: String,
     var deleted: Boolean,
     val path: String,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime,
+
+    val memberId: String,
+    val nickname: String,
+    val profileImageUrl: String?,
 ) {
     companion object {
         fun from(comment: CommentV2): CommentResponseV2 {
             return CommentResponseV2(
-                commentId = comment.commentId,
+                commentId = comment.commentId.toString(),
                 content = comment.content,
-                postId = comment.postId,
-                writerId = comment.writerId,
+                postId = comment.postId.toString(),
                 deleted = comment.deleted,
                 path = comment.commentPath.path,
                 createdAt = comment.createdAt!!,
-                updatedAt = comment.updatedAt!!
+                updatedAt = comment.updatedAt!!,
+
+                memberId = comment.member.memberId.toString(),
+                nickname = comment.member.nickname,
+                profileImageUrl = comment.member.profileImageUrl,
             )
         }
     }

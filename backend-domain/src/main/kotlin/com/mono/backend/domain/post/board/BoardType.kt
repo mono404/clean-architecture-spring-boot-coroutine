@@ -16,7 +16,7 @@ enum class BoardType(
         private val codeMap = entries.associateBy(BoardType::code)
         private val descMap = entries.associateBy(BoardType::desc)
 
-        fun fromId(id: Long): BoardType = idMap[id] ?: ALL
+        fun fromId(id: Long?): BoardType = idMap[id] ?: ALL
         fun fromCode(code: String): BoardType = codeMap[code] ?: ALL
         fun fromDesc(desc: String): BoardType = descMap[desc] ?: ALL
     }

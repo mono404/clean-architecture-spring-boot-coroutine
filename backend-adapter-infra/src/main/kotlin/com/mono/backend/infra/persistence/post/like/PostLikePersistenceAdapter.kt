@@ -16,6 +16,10 @@ class PostLikePersistenceAdapter(
         return postLikeRepository.findByPostIdAndMemberId(postId, memberId)?.toDomain()
     }
 
+    override suspend fun findAllByPostIdsAndMemberId(postIds: List<Long>, memberId: Long): List<PostLike> {
+        return postLikeRepository.findAllByPostIdInAndMemberId(postIds, memberId).map { it.toDomain() }
+    }
+
     override suspend fun delete(postLike: PostLike) {
         return postLikeRepository.delete(PostLikeEntity.from(postLike))
     }

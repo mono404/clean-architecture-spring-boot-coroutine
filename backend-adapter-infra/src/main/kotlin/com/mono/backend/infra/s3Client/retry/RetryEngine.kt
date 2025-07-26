@@ -9,7 +9,7 @@ object RetryEngine {
     suspend inline fun <reified T> run(
         maxRetries: Int = 3,
         initialDelay: Duration = 300.milliseconds,
-        block: suspend () -> T
+        noinline block: suspend () -> T
     ): T {
         var currentDelay = initialDelay
         repeat(maxRetries - 1) {

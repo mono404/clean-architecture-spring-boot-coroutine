@@ -10,21 +10,31 @@ data class PostDeletedEventPayload(
     val title: String = "",
     val content: String = "",
     val boardType: BoardType = BoardType.FREE,
-    val writerId: Long = 0,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now(),
-    val boardPostCount: Long = 0
-): EventPayload {
+
+    // 게시판 게시물 수 반 정규화
+    val boardPostCount: Long = 0,
+
+    // member 반 정규화
+    val memberId: Long = 0,
+    val nickname: String = "",
+    val profileImageUrl: String? = null,
+) : EventPayload {
     companion object {
         fun from(post: Post, count: Long) = PostDeletedEventPayload(
             postId = post.postId,
             title = post.title,
             content = post.content,
             boardType = post.boardType,
-            writerId = post.writerId,
             createdAt = post.createdAt!!,
             updatedAt = post.updatedAt!!,
-            boardPostCount = count
+
+            boardPostCount = count,
+
+            memberId = post.member.memberId,
+            nickname = post.member.nickname,
+            profileImageUrl = post.member.profileImageUrl,
         )
     }
 }

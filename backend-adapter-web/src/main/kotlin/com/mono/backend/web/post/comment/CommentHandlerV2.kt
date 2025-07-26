@@ -4,11 +4,13 @@ import com.mono.backend.common.log.logger
 import com.mono.backend.port.web.post.comment.CommentV2UseCase
 import com.mono.backend.port.web.post.comment.dto.CommentCreateRequestV2
 import com.mono.backend.web.common.DefaultHandler
+import com.mono.backend.web.common.RequestAttributeUtils.getCursorRequest
+import com.mono.backend.web.common.RequestAttributeUtils.getMemberId
+import com.mono.backend.web.common.RequestAttributeUtils.getPageRequest
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.awaitBody
-import kotlin.jvm.optionals.getOrNull
 
 @Component
 class CommentHandlerV2(
@@ -22,34 +24,22 @@ class CommentHandlerV2(
     }
 
     suspend fun readAll(serverRequest: ServerRequest): ServerResponse {
-        val postId = serverRequest.queryParam("postId").get().toLong()
-        val page = serverRequest.queryParam("page").get().toLong()
-        val pageSize = serverRequest.queryParam("pageSize").get().toLong()
-        return ok(
-            commentV2UseCase.readAll(
-                postId = postId,
-                page = page,
-                pageSize = pageSize
-            )
-        )
+        val postId = serverRequest.pathVariable("postId").toLong()
+        val pageRequest = serverRequest.getPageRequest()
+        return ok(commentV2UseCase.readAll(postId, pageRequest))
     }
 
     suspend fun readAllInfiniteScroll(serverRequest: ServerRequest): ServerResponse {
-        val postId = serverRequest.queryParam("postId").get().toLong()
-        val lastPath = serverRequest.queryParam("lastPath").getOrNull()
-        val pageSize = serverRequest.queryParam("pageSize").get().toLong()
-        return ok(
-            commentV2UseCase.readAllInfiniteScroll(
-                postId = postId,
-                lastPath = lastPath,
-                pageSize = pageSize,
-            )
-        )
+        val postId = serverRequest.pathVariable("postId").toLong()
+        val cursorRequest = serverRequest.getCursorRequest()
+        return ok(commentV2UseCase.readAllInfiniteScroll(postId, cursorRequest))
     }
 
     suspend fun create(serverRequest: ServerRequest): ServerResponse {
+        val memberId = serverRequest.getMemberId()
+        val postId = serverRequest.pathVariable("postId").toLong()
         val requestBody = serverRequest.awaitBody(CommentCreateRequestV2::class)
-        return ok(commentV2UseCase.create(requestBody))
+        return ok(commentV2UseCase.create(memberId, postId, requestBody))
     }
 
     suspend fun update(serverRequest: ServerRequest): ServerResponse {

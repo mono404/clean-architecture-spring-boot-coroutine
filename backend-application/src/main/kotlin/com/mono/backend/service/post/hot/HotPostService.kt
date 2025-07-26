@@ -11,9 +11,9 @@ class HotPostService(
     private val postQueryService: PostQueryService,
     private val hotPostListCachePort: HotPostListCachePort
 ) : HotPostUseCase {
-    override suspend fun readAll(dateStr: String): List<HotPostResponse>? {
+    override suspend fun readAll(memberId: Long?, dateStr: String): List<HotPostResponse>? {
         return hotPostListCachePort.readAll(dateStr)
-            ?.mapNotNull { postQueryService.read(it!!) }
+            ?.mapNotNull { postQueryService.read(it!!, memberId) }
             ?.map(HotPostResponse::from)
     }
 }

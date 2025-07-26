@@ -1,6 +1,7 @@
 package com.mono.backend.infra.persistence.post
 
 import com.mono.backend.common.snowflake.Snowflake
+import com.mono.backend.domain.common.member.EmbeddedMember
 import com.mono.backend.domain.post.Post
 import com.mono.backend.domain.post.board.BoardType
 import org.springframework.data.annotation.CreatedDate
@@ -17,11 +18,15 @@ data class PostEntity(
     val title: String,
     val content: String,
     val boardId: Long, // 게시판 아이디
-    val writerId: Long, // 작성자 아이디
     @CreatedDate
     var createdAt: LocalDateTime? = null,
     @LastModifiedDate
     var updatedAt: LocalDateTime? = null,
+
+    // member 의 반정규화 필드
+    val memberId: Long, // 작성자 아이디
+    val nickname: String,
+    val profileImageUrl: String?
 ) : Persistable<Long> {
     override fun getId(): Long = postId
     override fun isNew(): Boolean = createdAt == null
@@ -31,20 +36,30 @@ data class PostEntity(
             title = title,
             content = content,
             boardType = BoardType.fromId(boardId),
-            writerId = writerId,
             createdAt = createdAt,
-            updatedAt = updatedAt
+            updatedAt = updatedAt,
+
+            member = EmbeddedMember(
+                memberId = memberId,
+                nickname = nickname,
+                profileImageUrl = profileImageUrl
+            )
         )
     }
 
     companion object {
         fun from(post: Post): PostEntity {
             return PostEntity(
-                Snowflake.nextId(),
-                post.title,
-                post.content,
-                post.boardType.id,
-                post.writerId
+                postId = Snowflake.nextId(),
+                title = post.title,
+                content = post.content,
+                boardId = post.boardType.id,
+                createdAt = post.createdAt,
+                updatedAt = post.updatedAt,
+
+                memberId = post.member.memberId,
+                nickname = post.member.nickname,
+                profileImageUrl = post.member.profileImageUrl,
             )
         }
     }

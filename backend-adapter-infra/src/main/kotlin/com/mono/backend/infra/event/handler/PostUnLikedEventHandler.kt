@@ -27,17 +27,17 @@ class PostUnLikedEventHandler(
         event.payload?.let { payload ->
             postQueryModelCache.read(postId = payload.postId)
                 ?.let { postQueryModel ->
-                    postQueryModel.updateBy(payload)
+                    postQueryModel.postLikeCount--
                     postQueryModelCache.update(postQueryModel)
                 }
         }
     }
 
-    override suspend fun supports(event: Event<PostUnlikedEventPayload>): Boolean {
+    override fun supports(event: Event<PostUnlikedEventPayload>): Boolean {
         return EventType.POST_UNLIKED == event.type
     }
 
-    override suspend fun findPostId(event: Event<PostUnlikedEventPayload>): Long? {
+    override fun findPostId(event: Event<PostUnlikedEventPayload>): Long? {
         return event.payload?.postId
     }
 }

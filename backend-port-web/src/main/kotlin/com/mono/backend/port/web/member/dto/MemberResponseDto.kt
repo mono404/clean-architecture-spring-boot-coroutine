@@ -5,7 +5,7 @@ import com.mono.backend.domain.member.MemberRole
 import com.mono.backend.domain.member.SocialProvider
 
 data class MemberResponse(
-    val memberId: Long,
+    val memberId: String,
     val nickname: String,
     val profileImageUrl: String?,
     val role: MemberRole,
@@ -13,7 +13,7 @@ data class MemberResponse(
 ) {
     companion object {
         fun from(member: Member) = MemberResponse(
-            memberId = member.memberId,
+            memberId = member.memberId.toString(),
             nickname = member.nickname,
             profileImageUrl = member.profileImageUrl,
             role = member.role,

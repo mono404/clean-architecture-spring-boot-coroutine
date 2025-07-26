@@ -13,6 +13,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("io.r2dbc:r2dbc-proxy")
     runtimeOnly("io.asyncer:r2dbc-mysql:1.3.0")
 
     // Firebase Admin SDK

@@ -32,6 +32,10 @@ subprojects {
         maven { url = uri("https://plugins.gradle.org/m2/") }
     }
 
+    extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
+        jvmToolchain(17)
+    }
+
     tasks.withType<JavaCompile> {
         options.encoding = "utf-8"
     }

@@ -28,17 +28,17 @@ class PostLikedEventHandler(
         event.payload?.let { payload ->
             postQueryModelCachePort.read(payload.postId)
                 ?.let { postQueryModel ->
-                    postQueryModel.updateBy(payload)
+                    postQueryModel.postLikeCount++
                     postQueryModelCachePort.update(postQueryModel)
                 }
         }
     }
 
-    override suspend fun supports(event: Event<PostLikedEventPayload>): Boolean {
+    override fun supports(event: Event<PostLikedEventPayload>): Boolean {
         return EventType.POST_LIKED == event.type
     }
 
-    override suspend fun findPostId(event: Event<PostLikedEventPayload>): Long? {
+    override fun findPostId(event: Event<PostLikedEventPayload>): Long? {
         return event.payload?.postId
     }
 }

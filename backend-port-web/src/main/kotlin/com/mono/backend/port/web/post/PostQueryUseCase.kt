@@ -7,8 +7,12 @@ import com.mono.backend.port.web.post.dto.PostReadPageResponse
 import com.mono.backend.port.web.post.dto.PostReadResponse
 
 interface PostQueryUseCase {
-    suspend fun read(postId: Long): PostReadResponse
-    suspend fun readAll(boardType: BoardType, pageRequest: PageRequest): PostReadPageResponse
-    suspend fun readAllInfiniteScroll(boardType: BoardType, cursorRequest: CursorRequest): List<PostReadResponse>
+    suspend fun read(postId: Long, memberId: Long?): PostReadResponse
+    suspend fun readAll(memberId: Long?, boardType: BoardType, pageRequest: PageRequest): PostReadPageResponse
+    suspend fun readAllInfiniteScroll(
+        memberId: Long?,
+        boardType: BoardType,
+        cursorRequest: CursorRequest
+    ): List<PostReadResponse>
     suspend fun count(boardType: BoardType): Long
 }

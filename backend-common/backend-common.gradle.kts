@@ -1,6 +1,8 @@
 dependencies {
     implementation(project(":backend-domain"))
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+
     // kotlin
     api("org.jetbrains.kotlin:kotlin-reflect")
 

@@ -24,4 +24,8 @@ class BoardPostCountPersistenceAdapter(
     override suspend fun decrease(boardType: BoardType): Int {
         return boardPostCountRepository.decrease(boardType.id)
     }
+
+    override suspend fun upsertIncrease(boardType: BoardType): Int {
+        return boardPostCountRepository.upsertIncrease(boardType.id)
+    }
 }

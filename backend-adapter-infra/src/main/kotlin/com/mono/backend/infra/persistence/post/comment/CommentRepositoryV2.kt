@@ -61,7 +61,7 @@ interface CommentRepositoryV2 : CoroutineCrudRepository<CommentV2Entity, Long> {
     )
     suspend fun findAllInfiniteScroll(
         @Param("postId") postId: Long,
-        @Param("limit") limit: Long
+        @Param("limit") limit: Long,
     ): List<CommentV2Entity>
 
     @Query(
@@ -74,8 +74,8 @@ interface CommentRepositoryV2 : CoroutineCrudRepository<CommentV2Entity, Long> {
     )
     suspend fun findAllInfiniteScroll(
         @Param("postId") postId: Long,
+        @Param("limit") limit: Long,
         @Param("lastPath") lastPath: String,
-        @Param("limit") limit: Long
     ): List<CommentV2Entity>
 
     suspend fun findAllByPostId(postId: Long): List<CommentV2Entity>

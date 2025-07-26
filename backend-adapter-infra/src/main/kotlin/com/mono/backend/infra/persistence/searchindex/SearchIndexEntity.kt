@@ -1,5 +1,6 @@
 package com.mono.backend.infra.persistence.searchindex
 
+import com.mono.backend.domain.common.member.EmbeddedMember
 import com.mono.backend.domain.post.board.BoardType
 import com.mono.backend.domain.search.DomainType
 import com.mono.backend.domain.search.SearchIndex
@@ -23,6 +24,10 @@ data class SearchIndexEntity(
     val createdAt: LocalDateTime? = null,
     @LastModifiedDate
     val updatedAt: LocalDateTime? = null,
+
+    val memberId: Long,
+    val nickname: String,
+    val profileImageUrl: String?,
 ) : Persistable<Long> {
     override fun getId(): Long = searchIndexId
     override fun isNew(): Boolean = createdAt == null
@@ -34,7 +39,13 @@ data class SearchIndexEntity(
         content = content,
         comment = comment,
         createdAt = createdAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+
+        member = EmbeddedMember(
+            memberId = memberId,
+            nickname = nickname,
+            profileImageUrl = profileImageUrl
+        )
     )
 
     companion object {
@@ -46,7 +57,11 @@ data class SearchIndexEntity(
             content = searchIndex.content,
             comment = searchIndex.comment,
             createdAt = searchIndex.createdAt,
-            updatedAt = searchIndex.updatedAt
+            updatedAt = searchIndex.updatedAt,
+
+            memberId = searchIndex.member.memberId,
+            nickname = searchIndex.member.nickname,
+            profileImageUrl = searchIndex.member.profileImageUrl,
         )
     }
 }

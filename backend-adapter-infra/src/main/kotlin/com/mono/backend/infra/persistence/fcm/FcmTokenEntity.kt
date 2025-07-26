@@ -41,7 +41,6 @@ data class FcmTokenEntity(
             fcmToken = fcmToken.fcmToken,
             deviceId = fcmToken.deviceId,
             createdAt = fcmToken.createdAt,
-            updatedAt = fcmToken.updatedAt
         )
     }
 }

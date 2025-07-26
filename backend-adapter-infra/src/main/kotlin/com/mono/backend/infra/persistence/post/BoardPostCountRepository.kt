@@ -26,4 +26,14 @@ interface BoardPostCountRepository : CoroutineCrudRepository<BoardPostCountEntit
         """
     )
     suspend fun decrease(boardId: Long): Int
+
+    @Modifying
+    @Query(
+        value = """
+            INSERT INTO board_post_count (board_id, post_count, created_at) 
+            VALUES (:boardId, 1, NOW()) 
+            ON DUPLICATE KEY UPDATE post_count = post_count + 1
+        """
+    )
+    suspend fun upsertIncrease(boardId: Long): Int
 }

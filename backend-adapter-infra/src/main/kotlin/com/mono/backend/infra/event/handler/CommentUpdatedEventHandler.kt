@@ -29,11 +29,11 @@ class CommentUpdatedEventHandler(
         }
     }
 
-    override suspend fun supports(event: Event<CommentUpdatedEventPayload>): Boolean {
-        return EventType.COMMENT_UPDATED == event.type
+    override fun supports(event: Event<CommentUpdatedEventPayload>): Boolean {
+        return EventType.POST_COMMENT_UPDATED == event.type
     }
 
-    override suspend fun findPostId(event: Event<CommentUpdatedEventPayload>): Long? {
+    override fun findPostId(event: Event<CommentUpdatedEventPayload>): Long? {
         return event.payload?.postId
     }
 }

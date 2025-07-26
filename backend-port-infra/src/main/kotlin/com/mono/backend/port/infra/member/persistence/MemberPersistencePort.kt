@@ -8,4 +8,5 @@ interface MemberPersistencePort {
     suspend fun findById(memberId: Long): Member?
     suspend fun findByOAuth(provider: SocialProvider, providerId: String): Member?
     suspend fun existsByNickname(nickname: String): Boolean
+    suspend fun findAllByIdIn(memberIds: List<Long>): List<Member>
 }

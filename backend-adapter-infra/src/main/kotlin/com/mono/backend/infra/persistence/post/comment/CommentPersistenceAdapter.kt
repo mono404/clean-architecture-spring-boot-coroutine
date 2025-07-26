@@ -1,5 +1,6 @@
 package com.mono.backend.infra.persistence.post.comment
 
+import com.mono.backend.domain.common.pagination.PageRequest
 import com.mono.backend.domain.post.comment.Comment
 import com.mono.backend.port.infra.comment.persistence.CommentPersistencePort
 import org.springframework.stereotype.Repository
@@ -24,7 +25,9 @@ class CommentPersistenceAdapter(
         return commentRepository.delete(CommentEntity.from(comment))
     }
 
-    override suspend fun findAll(postId: Long, offset: Long, limit: Long): List<Comment> {
+    override suspend fun findAll(postId: Long, pageRequest: PageRequest): List<Comment> {
+        val offset = pageRequest.page * pageRequest.size
+        val limit = pageRequest.size
         return commentRepository.findAll(postId, offset, limit).map(CommentEntity::toDomain)
     }
 

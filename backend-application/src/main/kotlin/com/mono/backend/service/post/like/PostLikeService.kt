@@ -12,6 +12,7 @@ import com.mono.backend.port.infra.like.persistence.PostLikePersistencePort
 import com.mono.backend.port.infra.post.event.PostEventDispatcherPort
 import com.mono.backend.port.web.post.like.PostLikeUseCase
 import com.mono.backend.port.web.post.like.dto.PostLikeResponse
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.springframework.stereotype.Service
@@ -28,6 +29,12 @@ class PostLikeService(
         }
     }
 
+    override suspend fun readAll(postIds: List<Long>, memberId: Long): Map<Long, PostLikeResponse> {
+        return postLikePersistencePort.findAllByPostIdsAndMemberId(postIds, memberId)
+            .map { PostLikeResponse.from(it) }
+            .associateBy { it.postId }
+    }
+
     /**
      * update 구문
      */
@@ -37,19 +44,6 @@ class PostLikeService(
 
             launch {
                 postLikeCountPersistencePort.increase(postId).takeIf { it == 0 }?.let {
-                    /***
-                     * 최초 요청 시에는 update 되는 레코드가 없으므로, 1로 초기화 한다.
-                     * 트래픽이 순식간에 몰릴 수 있는 상황에는 유실될 수 있으므로, 게시글 생성 시점에 미리 0으로 초기화 해둘 수도 있다.
-                     */
-                    /***
-                     * 최초 요청 시에는 update 되는 레코드가 없으므로, 1로 초기화 한다.
-                     * 트래픽이 순식간에 몰릴 수 있는 상황에는 유실될 수 있으므로, 게시글 생성 시점에 미리 0으로 초기화 해둘 수도 있다.
-                     */
-                    /***
-                     * 최초 요청 시에는 update 되는 레코드가 없으므로, 1로 초기화 한다.
-                     * 트래픽이 순식간에 몰릴 수 있는 상황에는 유실될 수 있으므로, 게시글 생성 시점에 미리 0으로 초기화 해둘 수도 있다.
-                     */
-
                     /***
                      * 최초 요청 시에는 update 되는 레코드가 없으므로, 1로 초기화 한다.
                      * 트래픽이 순식간에 몰릴 수 있는 상황에는 유실될 수 있으므로, 게시글 생성 시점에 미리 0으로 초기화 해둘 수도 있다.
@@ -85,12 +79,19 @@ class PostLikeService(
      */
     override suspend fun likePessimisticLock2(postId: Long, memberId: Long) = coroutineScope {
         transaction {
-            launch { postLikePersistencePort.save(PostLike.from(Snowflake.nextId(), postId, memberId)) }
+            val postLike = async { postLikePersistencePort.save(PostLike.from(Snowflake.nextId(), postId, memberId)) }
 
             val postLikeCount = postLikeCountPersistencePort.findLockedByPostId(postId)
                 ?: PostLikeCount(postId, 0L)
             postLikeCount.increase()
-            postLikeCountPersistencePort.save(postLikeCount) // find가 안된 경우 새로 생성하기 때문에, save 명시적 호출
+
+            // find가 안된 경우 새로 생성하기 때문에, save 명시적 호출
+            postLikeCountPersistencePort.save(postLikeCount).also {
+                postEventDispatcherPort.dispatch(
+                    type = EventType.POST_LIKED,
+                    payload = PostLikedEventPayload.from(postLike.await(), postLikeCount.likeCount)
+                )
+            }
         }
     }
 
@@ -109,12 +110,29 @@ class PostLikeService(
 
     override suspend fun likeOptimisticLock(postId: Long, memberId: Long) = coroutineScope {
         transaction {
-            launch { postLikePersistencePort.save(PostLike.from(Snowflake.nextId(), postId, memberId)) }
+            val postLike = async { postLikePersistencePort.save(PostLike.from(Snowflake.nextId(), postId, memberId)) }
 
             val postLikeCount = postLikeCountPersistencePort.findById(postId)
                 ?: PostLikeCount(postId, 0L)
+
+            // Optimistic Locking in JPA
+//            postLikeCount.increase()
+//            postLikeCountPersistencePort.save(postLikeCount)
+
+            // Optimistic Locking in R2DBC
+            val previousVersion = postLikeCount.version
             postLikeCount.increase()
-            postLikeCountPersistencePort.save(postLikeCount)
+
+            val updated = postLikeCountPersistencePort.saveWithVersionCheck(postLikeCount, previousVersion)
+            if (!updated) {
+                throw RuntimeException("PostLikeCount version conflict on like (optimistic lock failure")
+            }
+
+            postEventDispatcherPort.dispatch(
+                type = EventType.POST_LIKED,
+                payload = PostLikedEventPayload.from(postLike.await(), postLikeCount.likeCount)
+            )
+            postLikeCount
         }
     }
 
@@ -125,13 +143,29 @@ class PostLikeService(
                     launch { postLikePersistencePort.delete(postLike) }
                     val postLikeCount = postLikeCountPersistencePort.findById(postId)
                         ?: throw RuntimeException("count not found")
+
+                    // Optimistic Locking in JPA
+//                    postLikeCount.decrease()
+//                    postLikeCountPersistencePort.save(postLikeCount)
+
+                    // Optimistic Locking in R2DBC
+                    val previousVersion = postLikeCount.version
                     postLikeCount.decrease()
-                    postLikeCountPersistencePort.save(postLikeCount)
+
+                    val updated = postLikeCountPersistencePort.saveWithVersionCheck(postLikeCount, previousVersion)
+                    if (!updated) {
+                        throw RuntimeException("PostLikeCount version conflict on unlike (optimistic lock failure")
+                    }
+                    postLikeCount
                 }
         }
     }
 
     override suspend fun count(postId: Long): Long {
         return postLikeCountPersistencePort.findById(postId)?.likeCount ?: 0
+    }
+
+    override suspend fun countAll(postIds: List<Long>): Map<Long, Long> {
+        return postLikeCountPersistencePort.findByIds(postIds).associate { it.postId to it.likeCount }
     }
 }

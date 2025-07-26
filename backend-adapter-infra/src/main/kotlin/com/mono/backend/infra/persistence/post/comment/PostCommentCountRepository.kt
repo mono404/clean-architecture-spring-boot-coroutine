@@ -18,4 +18,11 @@ interface PostCommentCountRepository : CoroutineCrudRepository<PostCommentCountE
         value = "UPDATE post_comment_count SET comment_count = comment_count - 1 WHERE post_id = :postId"
     )
     suspend fun decrease(postId: Long): Int
+
+    @Query(
+        value = """
+            SELECT * FROM post_comment_count WHERE post_id IN (:postIds)
+        """
+    )
+    suspend fun findAllByPostIdIn(postIds: List<Long>): List<PostCommentCountEntity>
 }

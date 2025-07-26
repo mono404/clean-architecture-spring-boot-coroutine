@@ -86,11 +86,11 @@ class AuthService(
 
     override suspend fun test(): Tokens {
         val member = Member(
-            memberId = 123456789,
-            providerId = "test",
+            memberId = 200552733272592384,
+            providerId = "4249815143",
             provider = SocialProvider.KAKAO,
-            nickname = "test",
-            profileImageUrl = "test",
+            nickname = "모노",
+            profileImageUrl = null,
             role = MemberRole.ADMIN,
             createdAt = LocalDateTime.now()
         )
@@ -103,3 +103,4 @@ class AuthService(
         return oAuthVerifiers.first { it.support(provider) }
     }
 }
+

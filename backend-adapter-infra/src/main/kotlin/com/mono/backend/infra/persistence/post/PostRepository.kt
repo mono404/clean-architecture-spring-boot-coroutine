@@ -37,11 +37,31 @@ interface PostRepository : CoroutineCrudRepository<PostEntity, Long> {
     @Query(
         value = """
             SELECT * FROM post
-            WHERE board_id = :boardId
+            ORDER BY post_id desc LIMIT :limit
+        """
+    )
+    suspend fun findAllInfiniteScroll(@Param("limit") limit: Long): List<PostEntity>
+
+    @Query(
+        value = """
+            SELECT * FROM post
+            WHERE post_id < :lastPostId
             ORDER BY post_id desc LIMIT :limit
         """
     )
     suspend fun findAllInfiniteScroll(
+        @Param("limit") limit: Long,
+        @Param("lastPostId") lastPostId: Long
+    ): List<PostEntity>
+
+    @Query(
+        value = """
+            SELECT * FROM post
+            WHERE board_id = :boardId
+            ORDER BY post_id desc LIMIT :limit
+        """
+    )
+    suspend fun findAllInfiniteScrollByBoard(
         @Param("boardId") boardId: Long,
         @Param("limit") limit: Long,
     ): List<PostEntity>
@@ -53,32 +73,9 @@ interface PostRepository : CoroutineCrudRepository<PostEntity, Long> {
             ORDER BY post_id desc LIMIT :limit
         """
     )
-    suspend fun findAllInfiniteScroll(
+    suspend fun findAllInfiniteScrollByBoard(
         @Param("boardId") boardId: Long,
         @Param("limit") limit: Long,
         @Param("lastPostId") lastPostId: Long,
     ): List<PostEntity>
-
-    @Query(
-        value = """
-            SELECT * FROM post
-            ORDER BY post_id desc LIMIT :limit
-        """
-    )
-    suspend fun findAllInfiniteScroll(@Param("limit") limit: Long): List<PostEntity>
-
-    // TODO : replace all find query to this
-//    @Query(
-//        value = """
-//            SELECT * FROM post
-//            WHERE (:boardId IS NULL OR board_id = :boardId)
-//            AND (:lastPostId IS NULL OR post_id < :lastPostId)
-//            ORDER BY post_id desc LIMIT :limit
-//        """
-//    )
-//    suspend fun findAllInfiniteScroll(
-//        @Param("boardId") boardId: Long? = null,
-//        @Param("limit") limit: Long,
-//        @Param("lastPostId") lastPostId: Long? = null,
-//    ): List<PostEntity>
 }

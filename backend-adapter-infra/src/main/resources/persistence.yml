@@ -1,8 +1,13 @@
 spring:
   r2dbc:
-    url: r2dbc:pool:mysql://127.0.0.1:3306/backend?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    url: r2dbc:mysql://127.0.0.1:3306/backend?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: root
     password: 1234
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 20
+      max-idle-time: 30s
 
   data:
     r2dbc:
@@ -19,6 +24,3 @@ aws:
     localEndpoint: http://s3.localhost.localstack.cloud:4566
     accessKey: localstack
     secretKey: localstack
-#    bucketName: babybook-file-bucket
-#    region: ap-northeast-2
-#    localEndpoint: https://babybook-file-bucket.s3.ap-northeast-2.amazonaws.com
