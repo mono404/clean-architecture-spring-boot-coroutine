@@ -1,6 +1,7 @@
 package com.mono.backend.web
 
 import com.mono.backend.web.auth.AuthRouter
+import com.mono.backend.web.campsite.CampsiteRouter
 import com.mono.backend.web.exrate.ExRateRouter
 import com.mono.backend.web.member.MemberRouter
 import com.mono.backend.web.notification.NotificationRouter
@@ -20,6 +21,7 @@ class BackendRouter(
     private val memberRouter: MemberRouter,
     private val notificationRouter: NotificationRouter,
     private val searchRouter: SearchRouter,
+    private val campsiteRouter: CampsiteRouter,
 ) {
     @Bean
     fun backendRoutes(): RouterFunction<ServerResponse> = coRouter {
@@ -30,6 +32,7 @@ class BackendRouter(
             "/posts".nest(postRouter.postRoutes())
             "/notifications".nest(notificationRouter.notificationRoutes())
             "/search".nest(searchRouter.searchRoutes())
+            "/campsites".nest(campsiteRouter.campsiteRoutes())
         }
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.awaitBody
 import reactor.util.retry.Retry
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Service
 @DependsOn("webClientFactory")
 class GoogleOAuthTokenVerifier(

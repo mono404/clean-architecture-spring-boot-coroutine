@@ -12,6 +12,7 @@ import reactor.util.retry.Retry
 
 @Service
 @DependsOn("webClientFactory")
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class AppleOAuthTokenVerifier(
     @Qualifier("kakaoOAuthWebClientPair") webClientPair: WebClientPair,
 ) : OAuthTokenVerifier {
