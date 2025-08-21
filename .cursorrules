@@ -1,0 +1,154 @@
+# Clean Architecture Spring Boot Coroutine Project Rules
+
+## Project Overview
+This is a Clean Architecture project using Spring Boot WebFlux with Kotlin and Coroutines.
+Follow these rules and patterns when working with the codebase.
+
+## Architecture & Module Structure
+- **Clean Architecture Pattern**: Follow the hexagonal architecture with clear separation of concerns
+- **Multi-module Gradle project**: 8 modules organized by architectural layers
+  - `backend-bootstrap`: Main application entry point and configuration
+  - `backend-adapter-web`: Web layer adapters (controllers, handlers, routers)
+  - `backend-port-web`: Web layer ports and DTOs
+  - `backend-application`: Application services and business logic
+  - `backend-domain`: Core domain entities and business rules
+  - `backend-port-infra`: Infrastructure ports (repository interfaces)
+  - `backend-adapter-infra`: Infrastructure adapters (database, external services)
+  - `backend-common`: Shared utilities and common code
+
+## Technology Stack
+- **Spring Boot 3.3.7** with WebFlux (Reactive)
+- **Kotlin 1.9.25** with Coroutines
+- **Java 17** toolchain
+- **R2DBC with MySQL** for reactive database access
+- **Redis** for caching and distributed locking
+- **JWT** for authentication
+- **Firebase Admin SDK** for FCM notifications
+- **AWS S3** for file storage (with LocalStack for development)
+- **WebClient** for external API calls
+
+## Code Style & Patterns
+
+### Kotlin Conventions
+- Use data classes for domain entities and DTOs
+- Prefer immutable objects with copy() for updates
+- Use companion objects for factory methods and constants
+- Follow Kotlin naming conventions (camelCase, descriptive names)
+- Use extension functions when appropriate
+
+### Coroutines Guidelines
+- Use `suspend` functions for asynchronous operations
+- Prefer coroutines over reactive operators where possible
+- Use `supervisorScope` for parallel operations that shouldn't fail together
+- Use appropriate dispatchers:
+  - `Dispatchers.IO` for I/O operations (DB, network, file)
+  - `Dispatchers.Default` for CPU-intensive operations
+  - Use custom scopes defined in `CoroutineUtils`
+
+### Spring WebFlux Patterns
+- Use functional routing with RouterFunction
+- Implement handlers with suspend functions
+- Use `awaitBody()` for request body parsing
+- Return appropriate HTTP status codes with helper methods
+- Use ServerResponse builders for consistent responses
+
+### Database & Persistence
+- Use R2DBC repositories with coroutines
+- Implement custom queries with R2dbcEntityTemplate
+- Use transactions with TransactionExecutor
+- Follow repository pattern with clear interfaces
+- Use domain mappers for entity-domain conversion
+
+### Clean Architecture Rules
+- **Domain Layer**: Contains only business logic, no external dependencies
+- **Application Layer**: Orchestrates domain objects and external services
+- **Port Interfaces**: Define contracts between layers
+- **Adapters**: Implement ports and handle external concerns
+- Dependencies point inward (Dependency Inversion)
+
+### Error Handling
+- Use custom exceptions: `UnauthorizedException`, `ForbiddenException`, `BadRequestException`, `NotFoundException`
+- Implement global error handler with `GlobalErrorHandler`
+- Use `runCatchingAndLog()` utility for error logging
+- Return appropriate HTTP status codes
+
+### Event-Driven Architecture
+- Use domain events for cross-cutting concerns
+- Implement event handlers for different event types
+- Use supervisor scope for parallel event processing
+- Events should be immutable data classes
+
+### Testing Guidelines
+- Use JUnit 5 with `@TestInstance(Lifecycle.PER_CLASS)`
+- Use AssertJ for assertions
+- Use MockK for mocking in Kotlin
+- Use `@OptIn(ExperimentalCoroutinesApi::class)` for coroutine testing
+- Use `runTest` for suspend function testing
+- Test integration points with WebTestClient
+
+### Bean Registration
+- Use `@Service` for application services
+- Use `@Component` for adapters and handlers
+- Use `@Repository` for data access components
+- Use `@Configuration` for configuration classes
+- Prefer constructor injection over field injection
+
+### File Organization
+- Group related classes in packages by feature
+- Use descriptive package names
+- Keep domain models in domain layer packages
+- Separate DTOs in port packages
+
+### Configuration Management
+- Use YAML configuration files
+- Separate configuration by environment
+- Use `@ConfigurationProperties` for structured config
+- Keep sensitive data in environment variables
+
+## Naming Conventions
+- **Services**: End with `Service` (e.g., `AuthService`, `PostService`)
+- **Use Cases**: End with `UseCase` (e.g., `AuthUseCase`)
+- **Handlers**: End with `Handler` (e.g., `AuthHandler`, `PostHandler`)
+- **Routers**: End with `Router` (e.g., `AuthRouter`)
+- **Repositories**: End with `Repository` for interfaces, `Adapter` for implementations
+- **DTOs**: Use descriptive names with `Request`/`Response` suffixes
+- **Domain Events**: End with event type (e.g., `PostCreatedEvent`)
+
+## Performance & Optimization
+- Use caching strategically with Redis
+- Implement distributed locking for critical sections
+- Use connection pooling for database and HTTP clients
+- Monitor and log performance metrics
+- Use reactive streams for high-throughput operations
+
+## Security Guidelines
+- Validate all inputs at adapter boundaries
+- Use JWT tokens for stateless authentication
+- Implement proper authorization checks
+- Sanitize data before persistence
+- Use HTTPS for all external communications
+
+## Development Practices
+- Write comprehensive tests for business logic
+- Use dependency injection for testability
+- Keep functions small and focused
+- Document complex business rules
+- Use meaningful variable and function names
+- Prefer composition over inheritance
+
+## External Integrations
+- Use WebClient for HTTP calls
+- Implement retry mechanisms for external services
+- Use circuit breaker patterns for resilience
+- Mock external services in tests
+- Handle timeouts gracefully
+
+When implementing new features:
+1. Start with domain modeling
+2. Define use case interfaces in port layer
+3. Implement business logic in application services
+4. Create adapters for external concerns
+5. Add comprehensive tests
+6. Update configuration as needed
+
+Always consider the reactive nature of the application and use appropriate async patterns. 

@@ -1,0 +1,35 @@
+package com.mono.backend.domain.event.payload
+
+import com.mono.backend.domain.event.EventPayload
+import com.mono.backend.domain.post.Post
+import com.mono.backend.domain.post.board.BoardType
+import java.time.LocalDateTime
+
+data class PostUpdatedEventPayload(
+    val postId: Long = 0,
+    val title: String = "",
+    val content: String = "",
+    val boardType: BoardType = BoardType.FREE,
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val updatedAt: LocalDateTime = LocalDateTime.now(),
+
+    // member 반 정규화
+    val memberId: Long = 0,
+    val nickname: String = "",
+    val profileImageUrl: String? = null,
+) : EventPayload {
+    companion object {
+        fun from(post: Post) = PostUpdatedEventPayload(
+            postId = post.postId,
+            title = post.title,
+            content = post.content,
+            boardType = post.boardType,
+            createdAt = post.createdAt!!,
+            updatedAt = post.updatedAt!!,
+
+            memberId = post.member.memberId,
+            nickname = post.member.nickname,
+            profileImageUrl = post.member.profileImageUrl,
+        )
+    }
+}

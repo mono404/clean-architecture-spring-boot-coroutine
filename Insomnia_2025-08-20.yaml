@@ -1,0 +1,991 @@
+type: collection.insomnia.rest/5.0
+name: Backend
+meta:
+  id: wrk_6981ed4255ea48849d40922a7d6b7a9a
+  created: 1747722647895
+  modified: 1747722647895
+  description: ""
+collection:
+  - name: Auth
+    meta:
+      id: fld_7da2065aa9a14fb48abfebdabbb09bdf
+      created: 1747722674211
+      modified: 1747722674211
+      sortKey: -1747722674211
+      description: ""
+    children:
+      - url: http://localhost:3001/v1/auth/social-login
+        name: social-login
+        meta:
+          id: req_a8652c90ece9414aa3c853540fcae58d
+          created: 1747722678039
+          modified: 1747723628780
+          isPrivate: false
+          description: ""
+          sortKey: -1747722678039
+        method: POST
+        body:
+          mimeType: application/json
+          text: >-
+            {
+              "provider": "KAKAO",
+              "accessToken": "",
+              "idToken": "",
+              "deviceId": "web"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3001/v1/auth/refresh
+        name: refresh
+        meta:
+          id: req_87f6b16561b0449bb9c0ec9490cae372
+          created: 1747729836607
+          modified: 1748230503915
+          isPrivate: false
+          description: ""
+          sortKey: -1747722677939
+        method: POST
+        body:
+          mimeType: application/json
+          text: >-
+            {
+            	"refreshToken": "",
+            	"deviceId": "web"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        authentication:
+          type: oauth1
+          disabled: false
+          signatureMethod: HMAC-SHA1
+          consumerKey: ""
+          consumerSecret: ""
+          tokenKey: ""
+          tokenSecret: ""
+          privateKey: ""
+          version: "1.0"
+          nonce: ""
+          timestamp: ""
+          callback: ""
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3001/v1/auth/test
+        name: test token
+        meta:
+          id: req_241da0756a7e479a90a9aa7d829f2c1e
+          created: 1749548026638
+          modified: 1749631754624
+          isPrivate: false
+          description: ""
+          sortKey: -1749548026638
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: post
+    meta:
+      id: fld_4623456ce30441d5b93ffff3883161bb
+      created: 1747725694485
+      modified: 1751450064635
+      sortKey: -1747725694485
+      description: ""
+    children:
+      - url: http://localhost:3001/v1/posts/infinite-scroll
+        name: infinite-scroll
+        meta:
+          id: req_5917b698e743462ab61db1805b7f6cf5
+          created: 1747725698057
+          modified: 1753680749482
+          isPrivate: false
+          description: ""
+          sortKey: -1747725698057
+        method: GET
+        parameters:
+          - id: pair_c0578ab0cc3449a4875e895a7f35492c
+            name: boardId
+            value: "0"
+            description: ""
+            disabled: false
+          - id: pair_891988aa2bce43cdac2ecdf8d35835eb
+            name: pageSize
+            value: "20"
+            description: ""
+            disabled: false
+          - id: pair_a3be11bb2b4748d09ff5cb190dff0cc1
+            name: cursor
+            value: "200910129253773312"
+            description: ""
+            disabled: true
+        headers:
+          - name: User-Agent
+            value: insomnia/11.1.0
+        authentication:
+          type: bearer
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3001/v1/posts
+        name: create
+        meta:
+          id: req_3785315e2a324c08bcc7cccb02f851a3
+          created: 1748577395553
+          modified: 1751968188179
+          isPrivate: false
+          description: ""
+          sortKey: -1748577395553
+        method: POST
+        body:
+          mimeType: multipart/form-data
+          params:
+            - id: pair_56fc4d0835f0487691717416de3e292a
+              name: title
+              value: 캠핑과 여름밤의 추억
+              description: ""
+              disabled: true
+            - id: pair_66c68e006f444dff937252ebf5ea45be
+              name: content
+              value: |-
+                # 캠핑과 여름밤의 추억
+
+                **캠핑**은 여름에 가장 즐거운 취미 중 하나입니다.
+                - 텐트 설치
+                - 불멍 즐기기
+                - 강가 산책
+
+                더운 날씨엔 시원한 강바람이 최고예요!
+              description: ""
+              disabled: true
+              type: text
+              multiline: true
+            - id: pair_55f48f66a12e4effaea89b6031c67f60
+              name: boardId
+              value: "2"
+              description: ""
+              disabled: true
+            - id: pair_625ab2ae54ba4b8d85bfaf8177b8fd38
+              name: title
+              value: 강아지와 함께한 불멍 🔥
+              description: ""
+              disabled: false
+            - id: pair_5d490dac6cc84882be38c50a5e1c6815
+              name: content
+              value: |-
+                # 강아지와 함께한 불멍 🔥
+
+                우리 **강아지**는 불멍할 때 가장 얌전해요.
+                - *간식 나눠먹기*
+                - 같이 불빛 보기
+
+                [불멍 추천 장소](https://example.com)
+              description: ""
+              disabled: false
+              type: text
+              multiline: true
+            - id: pair_6f7ea3370c7b48ed9d1d8048fd451e2d
+              name: boardId
+              value: "2"
+              description: ""
+              disabled: false
+            - id: pair_ea2df7dd1811430c8a6ba3b91727cb6f
+              name: title
+              value: 노을진 캠핑장에서
+              description: ""
+              disabled: true
+            - id: pair_3b3ec1c1cb92463880ff633c59e9d858
+              name: content
+              value: |-
+                ## 노을진 캠핑장에서
+
+                캠핑의 하이라이트는 바로 *노을*!
+                > 오늘의 노을은 정말 잊을 수 없었어요.
+
+                **사진 찍기 좋은 순간** 📸
+              description: ""
+              disabled: true
+              type: text
+              multiline: true
+            - id: pair_669a7ce0fcf04597a7c3d80dfa6bd976
+              name: boardId
+              value: "2"
+              description: ""
+              disabled: true
+            - id: pair_a1df7f39e6714058b82c850abf6349a1
+              name: title
+              value: 여름밤 불멍 즐기기
+              description: ""
+              disabled: true
+            - id: pair_778fb636ff5640b39e1c57c2b1615ba7
+              name: content
+              value: |-
+                # 여름밤 불멍 즐기기
+
+                여름밤에 **불멍**은 최고의 힐링 타임입니다.
+                - 조용한 음악
+                - 벌레 소리
+
+                *편안한 분위기를 느껴보세요*
+              description: ""
+              disabled: true
+              type: text
+              multiline: true
+            - id: pair_ed28c919a5d44715ae5036b0c3141ffa
+              name: boardId
+              value: "2"
+              description: ""
+              disabled: true
+        headers:
+          - name: Content-Type
+            value: multipart/form-data
+            id: pair_e799613c7f7d4754be722a5f0c54db4f
+          - name: User-Agent
+            value: insomnia/11.1.0
+            id: pair_73b832d18a43427aa4829fcc004dc33d
+        authentication:
+          type: bearer
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:3001/v1/posts/:postId
+        name: delete
+        meta:
+          id: req_d3c65bcf3abf4b4c90af99ce3a1bab4c
+          created: 1751966164900
+          modified: 1751966263886
+          isPrivate: false
+          description: ""
+          sortKey: -1748403997051.5
+        method: DELETE
+        body:
+          mimeType: multipart/form-data
+          params:
+            - id: pair_56fc4d0835f0487691717416de3e292a
+              name: title
+              value: 캠핑과 여름밤의 추억
+              description: ""
+              disabled: true
+            - id: pair_66c68e006f444dff937252ebf5ea45be
+              name: content
+              value: |-
+                # 캠핑과 여름밤의 추억
+
+                **캠핑**은 여름에 가장 즐거운 취미 중 하나입니다.
+                - 텐트 설치
+                - 불멍 즐기기
+                - 강가 산책
+
+                더운 날씨엔 시원한 강바람이 최고예요!
+              description: ""
+              disabled: true
+              type: text
+              multiline: true
+            - id: pair_55f48f66a12e4effaea89b6031c67f60
+              name: boardId
+              value: "2"
+              description: ""
+              disabled: true
+            - id: pair_625ab2ae54ba4b8d85bfaf8177b8fd38
+              name: title
+              value: 강아지와 함께한 불멍 🔥
+              description: ""
+              disabled: true
+            - id: pair_5d490dac6cc84882be38c50a5e1c6815
+              name: content
+              value: |-
+                # 강아지와 함께한 불멍 🔥
+
+                우리 **강아지**는 불멍할 때 가장 얌전해요.
+                - *간식 나눠먹기*
+                - 같이 불빛 보기
+
+                [불멍 추천 장소](https://example.com)
+              description: ""
+              disabled: true
+              type: text
+              multiline: true
+            - id: pair_6f7ea3370c7b48ed9d1d8048fd451e2d
+              name: boardId
+              value: "2"
+              description: ""
+              disabled: true
+            - id: pair_ea2df7dd1811430c8a6ba3b91727cb6f
+              name: title
+              value: 노을진 캠핑장에서
+              description: ""
+              disabled: true
+            - id: pair_3b3ec1c1cb92463880ff633c59e9d858
+              name: content
+              value: |-
+                ## 노을진 캠핑장에서
+
+                캠핑의 하이라이트는 바로 *노을*!
+                > 오늘의 노을은 정말 잊을 수 없었어요.
+
+                **사진 찍기 좋은 순간** 📸
+              description: ""
+              disabled: true
+              type: text
+              multiline: true
+            - id: pair_669a7ce0fcf04597a7c3d80dfa6bd976
+              name: boardId
+              value: "2"
+              description: ""
+              disabled: true
+            - id: pair_a1df7f39e6714058b82c850abf6349a1
+              name: title
+              value: 여름밤 불멍 즐기기
+              description: ""
+              disabled: false
+            - id: pair_778fb636ff5640b39e1c57c2b1615ba7
+              name: content
+              value: |-
+                # 여름밤 불멍 즐기기
+
+                여름밤에 **불멍**은 최고의 힐링 타임입니다.
+                - 조용한 음악
+                - 벌레 소리
+
+                *편안한 분위기를 느껴보세요*
+              description: ""
+              disabled: false
+              type: text
+              multiline: true
+            - id: pair_ed28c919a5d44715ae5036b0c3141ffa
+              name: boardId
+              value: "2"
+              description: ""
+              disabled: false
+        headers:
+          - name: Content-Type
+            value: multipart/form-data
+            id: pair_e799613c7f7d4754be722a5f0c54db4f
+          - name: User-Agent
+            value: insomnia/11.1.0
+            id: pair_73b832d18a43427aa4829fcc004dc33d
+        authentication:
+          type: bearer
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "200902600853065728"
+  - name: member
+    meta:
+      id: fld_45d818d9a8bb483c87a0ff6ff61b69ea
+      created: 1748230583288
+      modified: 1748230593517
+      sortKey: -1748230583288
+      description: ""
+    children:
+      - url: http://localhost:3001/v1/member/me
+        name: me
+        meta:
+          id: req_903be0f7f6184b10b47c2964370da555
+          created: 1748230200711
+          modified: 1748230648300
+          isPrivate: false
+          description: ""
+          sortKey: -1748230598550
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"nickname": "기모노"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.1.0
+        authentication:
+          type: bearer
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: fcm
+    meta:
+      id: fld_51c81a2b0e6e43d2bd6bb4413f14f6ca
+      created: 1750654977396
+      modified: 1750654977396
+      sortKey: -1750654977396
+      description: ""
+    children:
+      - url: http://localhost:3001/v1/fcm-tokens/send/topic
+        name: send topic
+        meta:
+          id: req_e79dfa940925401d95a40336ec179767
+          created: 1750654983723
+          modified: 1750911031428
+          isPrivate: false
+          description: ""
+          sortKey: -1750654983723
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"topic": "all",
+            	"title": "test",
+            	"body": "test",
+            	"data": {"foo": "bar"}
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.2.0
+        authentication:
+          type: bearer
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: search
+    meta:
+      id: fld_da3c9aaad7034f8d8fe8e5b3b91d17d3
+      created: 1750911039153
+      modified: 1750911039153
+      sortKey: -1750911039153
+      description: ""
+    children:
+      - url: "{{baseUrl}}/v1/search"
+        name: search
+        meta:
+          id: req_41ee110d62db478f9a73297b52672b63
+          created: 1750911043334
+          modified: 1751271238786
+          isPrivate: false
+          description: ""
+          sortKey: -1750911043334
+        method: GET
+        parameters:
+          - id: pair_86e642aef2104ece884e1e3f128d96f1
+            name: keyword
+            value: 캠핑
+            description: ""
+            disabled: false
+            type: text
+            multiline: false
+        headers:
+          - name: User-Agent
+            value: insomnia/11.2.0
+        authentication:
+          type: bearer
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: comment
+    meta:
+      id: fld_1ea617c84f144f17bc4ae6f10183b1d6
+      created: 1751960563135
+      modified: 1751960563135
+      sortKey: -1751960563135
+      description: ""
+    children:
+      - url: http://localhost:3001/v1/posts/:postId/comments
+        name: create
+        meta:
+          id: req_4a768ed6a32d4e748d1875d48c4e5252
+          created: 1751960574288
+          modified: 1753156960907
+          isPrivate: false
+          description: ""
+          sortKey: -1751960574288
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"content": "와 너무 멋져보여요!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.2.0
+        authentication:
+          type: bearer
+          token:
+          disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "205571248290119681"
+      - url: http://localhost:3001/v1/posts/:postId/comments/infinite-scroll
+        name: infinite-scroll
+        meta:
+          id: req_88a60565aedc4a34b53f2693482e727c
+          created: 1751968345266
+          modified: 1755045208892
+          isPrivate: false
+          description: ""
+          sortKey: -1751435808811
+        method: GET
+        parameters:
+          - id: pair_e96c119f12d5437eb01194bd960ba41e
+            name: pageSize
+            value: "10"
+            description: ""
+            disabled: false
+          - id: pair_d7e6662936544fdf8013e41cad354b7c
+            name: lastParentCommentId
+            value: "213460187990814720"
+            description: ""
+            disabled: true
+          - id: pair_ba3247239e1446c1b5ac05cae658c6e4
+            name: lastCommentId
+            value: "213460187990814720"
+            description: ""
+            disabled: true
+        headers:
+          - name: User-Agent
+            value: insomnia/11.2.0
+        authentication:
+          type: bearer
+          token:
+          disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "213458737868926976"
+      - url: http://localhost:3001/v1/posts/:postId/comments
+        name: create - child
+        meta:
+          id: req_f376401c899c4a55b1e4e51ecf0ca90c
+          created: 1753345331788
+          modified: 1753346141926
+          isPrivate: false
+          description: ""
+          sortKey: -1751698191549.5
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"content": "ㅎㅇㅇㅇ",
+            	"parentCommentId": 206675778786037760
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.2.0
+        authentication:
+          type: bearer
+          token:
+          disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "206205627567030272"
+      - url: http://localhost:3001/v1/posts/:postId/comments/:commentId
+        name: delete
+        meta:
+          id: req_e74455fffba94f9ab0ff62cc893cb83b
+          created: 1754978164648
+          modified: 1754987083581
+          isPrivate: false
+          description: ""
+          sortKey: -1751829382918.75
+        method: DELETE
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"content": "와 너무 멋져보여요!"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/11.2.0
+        authentication:
+          type: bearer
+          token:
+          disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "213458737868926976"
+          - name: commentId
+            value: "213459390548766720"
+  - name: like
+    meta:
+      id: fld_ae65d441d735466aadf736dbde04c693
+      created: 1753171949973
+      modified: 1753171949973
+      sortKey: -1753171949973
+      description: ""
+    children:
+      - url: http://localhost:3001/v1/posts/:postId/likes/pessimistic-lock-1
+        name: like - pessimistic-lock-1
+        meta:
+          id: req_caf257509ffe4f19a57d0d7a80fc07ec
+          created: 1753171954249
+          modified: 1753172050523
+          isPrivate: false
+          description: ""
+          sortKey: -1753171954249
+        method: POST
+        headers:
+          - name: User-Agent
+            value: insomnia/11.3.0
+        authentication:
+          type: bearer
+          prefix: ""
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "205571248290119681"
+      - url: http://localhost:3001/v1/posts/:postId/likes/pessimistic-lock-1
+        name: unlike - pessimistic-lock-1
+        meta:
+          id: req_9acbeb295e714f36aeefa945e137d54e
+          created: 1753172303826
+          modified: 1753172307021
+          isPrivate: false
+          description: ""
+          sortKey: -1752566264268.5
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/11.3.0
+        authentication:
+          type: bearer
+          prefix: ""
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "205571248290119681"
+      - url: http://localhost:3001/v1/posts/:postId/likes/pessimistic-lock-2
+        name: like - pessimistic-lock-2
+        meta:
+          id: req_a7c6d3067ed24fc2808cc4686bedaae2
+          created: 1753173903124
+          modified: 1753173918978
+          isPrivate: false
+          description: ""
+          sortKey: -1752869109258.75
+        method: POST
+        headers:
+          - name: User-Agent
+            value: insomnia/11.3.0
+        authentication:
+          type: bearer
+          prefix: ""
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "205571248290119681"
+      - url: http://localhost:3001/v1/posts/:postId/likes/optimistic
+        name: like - optimistic-lock
+        meta:
+          id: req_61f198e7f4064cc89be444b29911cb28
+          created: 1753173914814
+          modified: 1753173923917
+          isPrivate: false
+          description: ""
+          sortKey: -1752717686763.625
+        method: POST
+        headers:
+          - name: User-Agent
+            value: insomnia/11.3.0
+        authentication:
+          type: bearer
+          prefix: ""
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "205571248290119681"
+      - url: http://localhost:3001/v1/posts/:postId/likes/pessimistic-lock-1
+        name: unlike - pessimistic-lock-2
+        meta:
+          id: req_f90bcc1d2791427496a0ebb41947d15d
+          created: 1753173930086
+          modified: 1753173930086
+          isPrivate: false
+          description: ""
+          sortKey: -1752263419278.25
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/11.3.0
+        authentication:
+          type: bearer
+          prefix: ""
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "205571248290119681"
+      - url: http://localhost:3001/v1/posts/:postId/likes/pessimistic-lock-1
+        name: unlike - optimistic-lock
+        meta:
+          id: req_963cc21e84c6431c8a5b14b2979dc073
+          created: 1753173939897
+          modified: 1753173939897
+          isPrivate: false
+          description: ""
+          sortKey: -1752111996783.125
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/11.3.0
+        authentication:
+          type: bearer
+          prefix: ""
+          token:
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: postId
+            value: "205571248290119681"
+  - name: event
+    meta:
+      id: fld_028dc9e854d34bf089c3e7ae5d29d098
+      created: 1755161210053
+      modified: 1755161210053
+      sortKey: -1755161210053
+      description: ""
+    children:
+      - url: http://localhost:3001/admin/dlq/:id/reprocess
+        name: New Request
+        meta:
+          id: req_1a8f598a12c345b19e99ec9175184b62
+          created: 1755161216362
+          modified: 1755679432445
+          isPrivate: false
+          description: ""
+          sortKey: -1755161216362
+        method: POST
+        headers:
+          - name: User-Agent
+            value: insomnia/11.4.0
+        authentication:
+          type: bearer
+          token: "{{bearerToken}}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: id
+            value: ""
+  - name: campsite
+    meta:
+      id: fld_9fdd5bd60e77467d8694668558943bcf
+      created: 1755665184529
+      modified: 1755665184529
+      sortKey: -1755665184529
+      description: ""
+    children:
+      - url: http://localhost:3001/v1/campsites
+        name: findAllByGeoQuery
+        meta:
+          id: req_efe7fdcd4b3f4d21b9ddcfe8982ee8fd
+          created: 1755675556731
+          modified: 1755679414199
+          isPrivate: false
+          description: ""
+          sortKey: -1755413202522.5
+        method: GET
+        parameters:
+          - id: pair_23e58f7438fe49a4b7df8da0f47df847
+            name: west
+            value: "126.1202614074801"
+            description: ""
+            disabled: false
+          - id: pair_11abca1ddcc445048f02efa904ea0595
+            name: south
+            value: "36.66765786021229"
+            description: ""
+            disabled: false
+          - id: pair_1b8cbb38597e49a49a562e38b82f4d21
+            name: east
+            value: "126.37402461695248"
+            description: ""
+            disabled: false
+          - id: pair_bc26fc9754594bd9bdeceb354ce0a194
+            name: north
+            value: "36.977925952916856"
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/11.4.0
+        authentication:
+          type: bearer
+          token: "{{bearerToken}}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_729918ee0b7ce33f4938a9757926f6f7f7230e7f
+    created: 1747722647897
+    modified: 1747722647897
+environments:
+  name: Base Environment
+  meta:
+    id: env_729918ee0b7ce33f4938a9757926f6f7f7230e7f
+    created: 1747722647896
+    modified: 1747722647896
+    isPrivate: false
+  subEnvironments:
+    - name: Local
+      meta:
+        id: env_ca831b0b9fef446badb6f1cc0f05b31d
+        created: 1751263240834
+        modified: 1755679396464
+        isPrivate: false
+        sortKey: 1751263240834
+      data:
+        baseUrl: http://localhost:3001
+        bearerToken:

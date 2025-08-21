@@ -1,0 +1,43 @@
+spring:
+  r2dbc:
+    url: r2dbc:mysql://127.0.0.1:3306/backend?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: root
+    password: 1234
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 20
+      max-idle-time: 30s
+
+  data:
+    r2dbc:
+      repositories:
+        enabled: true
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+aws:
+  s3:
+    localEnabled: true
+    multipartMinPartSize: 5242880
+    numRetries: 2
+    bucketName: wonho-bucket
+    region: us-east-1
+    localEndpoint: http://s3.localhost.localstack.cloud:4566
+    accessKey: localstack
+    secretKey: localstack
+
+worker:
+  enabled: true
+  batch-size: 100
+  parallelism: 3
+  visibility-timeout-seconds: 120s
+  empty-backoff-initial: 200ms
+  empty-backoff-max: 5s
+  phase: 100
+
+reaper:
+  enabled: true
+  fixed-delay: 60s
+  phase: 101
